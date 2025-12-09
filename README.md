@@ -36,7 +36,7 @@ This software is designed to run completely offline and locally on your machine.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/trung-k49/SightSSH.git
+   git clone https://github.com/Daoductrung/SightSSH.git
    cd SightSSH
    ```
 
