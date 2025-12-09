@@ -1,3 +1,4 @@
-v0.4.1
-- Thử nghiệm tính năng cập nhật.
-- Đây là dòng thứ 2 của changelog để test hiển thị.
+v0.4.0
+
+* Confirm the update checking feature works.
+* The second line of what's new in version.md.
