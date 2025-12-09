@@ -1,6 +1,7 @@
 import urllib.request
 import threading
 import json
+import logging
 from packaging import version
 
 class UpdateChecker:
@@ -45,5 +46,5 @@ class UpdateChecker:
                 return has_update, remote_ver_str, changelog
                 
         except Exception as e:
-            print(f"Update Check Failed: {e}")
+            logging.warning(f"Update Check Failed: {e}")
             return False, None, None

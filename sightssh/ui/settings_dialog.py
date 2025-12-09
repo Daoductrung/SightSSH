@@ -148,8 +148,7 @@ class SettingsDialog(wx.Dialog):
         self.chk_ascii.SetToolTip(tr("desc_ascii_filter"))
         sizer.Add(self.chk_ascii, 0, wx.EXPAND | wx.ALL, 10)
         
-        self.chk_ascii.SetToolTip(tr("desc_ascii_filter"))
-        sizer.Add(self.chk_ascii, 0, wx.EXPAND | wx.ALL, 10)
+
         
         # Check Updates
         label_text = f"{tr('lbl_check_updates')}. {tr('desc_check_updates')}"
@@ -299,7 +298,7 @@ class SettingsDialog(wx.Dialog):
                 self.output_container.GetItem(i).Show(show)
             self.tab_terminal.Layout()
         except Exception as e:
-            print(f"Error in on_mode_change: {e}")
+            logging.error(f"Error in on_mode_change: {e}")
 
     def setup_accessibility_tab(self):
         panel = self.tab_accessibility

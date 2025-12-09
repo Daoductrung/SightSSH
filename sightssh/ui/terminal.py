@@ -29,7 +29,7 @@ class TerminalPanel(wx.Panel):
                 self.log_file = open(filepath, "a", encoding="utf-8")
                 self.log_file.write(f"--- Session Started: {timestamp} ---\n")
             except Exception as e:
-                print(f"Logging failed: {e}")
+                logging.error(f"Logging failed: {e}")
 
         if existing_client:
             self.client = existing_client

@@ -107,7 +107,7 @@ class MainFrame(wx.Frame):
         self.Raise()
         self.SetFocus()
 
-            self.show_welcome_screen()
+
 
     def check_updates(self, silent=False):
         """
@@ -140,6 +140,7 @@ class MainFrame(wx.Frame):
 
     def show_welcome_screen(self):
         if self.panel:
+            self._cleanup_current_panel()
             self.panel.Hide()
             self.panel.Destroy()
         
@@ -204,3 +205,72 @@ class MainFrame(wx.Frame):
         if cfg.get("check_updates_on_startup", True):
              # Debounce slightly to let UI settle
              wx.CallLater(1000, lambda: self.check_updates(silent=True))
+
+    def on_view_profiles(self, event):
+        from sightssh.ui.profile_list import ProfileListPanel
+        self.switch_to_panel(ProfileListPanel)
+
+    def on_create_profile(self, event):
+        from sightssh.ui.profile_editor import ProfileEditorPanel
+        self.switch_to_panel(ProfileEditorPanel)
+
+    def _cleanup_current_panel(self):
+        if self.panel and hasattr(self.panel, 'cleanup'):
+            try: self.panel.cleanup()
+            except: pass
+
+    def on_exit(self, event):
+        self._cleanup_current_panel()
+        
+        # Clean up settings dialog
+        dlg = getattr(self, 'settings_dlg', None)
+        if dlg:
+            dlg.Destroy()
+            
+        # Attempt graceful close
+        self.Close()
+        
+        # Force kill after short delay if threads hang
+        import os
+        wx.CallLater(500, lambda: os._exit(0))
+
+    def switch_to_panel(self, panel_class, **kwargs):
+        """Switches the content of the main frame to a new panel."""
+        self._cleanup_current_panel()
+        self.panel.Hide()
+        self.panel.Destroy()
+        
+        
+        self.panel = panel_class(self, **kwargs)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.panel.SetSizer(self.sizer)
+        
+        self.panel.Show()
+        self.Layout()
+        self.panel.SetFocus()
+
+    def start_session(self, connection_details):
+        # Start a fresh session
+        if hasattr(self, 'active_client') and self.active_client:
+            self.active_client.disconnect()
+        self.active_client = None 
+        
+        from sightssh.ui.terminal import TerminalPanel
+        self.switch_to_panel(TerminalPanel, connection_details=connection_details)
+
+    def switch_to_sftp(self, client, details):
+        from sightssh.ui.sftp import SFTPPanel
+        self.switch_to_panel(SFTPPanel, ssh_client=client, connection_details=details)
+
+    def switch_to_terminal(self, client, details):
+        from sightssh.ui.terminal import TerminalPanel
+        self.switch_to_panel(TerminalPanel, connection_details=details, existing_client=client)
+
+    def on_connection_error(self, connection_details):
+        profile_name = connection_details.get('name')
+        if profile_name:
+             from sightssh.ui.profile_editor import ProfileEditorPanel
+             self.switch_to_panel(ProfileEditorPanel, profile_name=profile_name, existing_data=connection_details, profile_password=None) 
+        else:
+             wx.MessageBox("Unknown profile error.", "Error")
+             self.show_welcome_screen()

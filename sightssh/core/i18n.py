@@ -34,7 +34,7 @@ class TranslationManager:
                     with open(os.path.join(lang_path, filename), "r", encoding="utf-8") as f:
                         self.translations[lang_code] = json.load(f)
                 except Exception as e:
-                    print(f"Failed to load language {lang_code}: {e}")
+                    logging.warning(f"Failed to load language {lang_code}: {e}")
 
     def set_language(self, lang_code):
         if lang_code in self.translations:

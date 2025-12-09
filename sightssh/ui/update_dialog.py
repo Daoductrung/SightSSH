@@ -46,8 +46,8 @@ class UpdateDialog(wx.Dialog):
         self.SetSizer(sizer)
         self.CenterOnParent()
         
-        # Focus download button
-        self.btn_download.SetFocus()
+        # Focus changelog for reading
+        self.txt_changelog.SetFocus()
 
     def on_download(self, event):
         webbrowser.open("https://github.com/Daoductrung/SightSSH/releases/latest")

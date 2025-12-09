@@ -57,9 +57,21 @@ class ConfigManager:
                 return json.load(f)
         except: return {}
 
+    def _atomic_write(self, filepath, data):
+        """Writes data to a temp file then renames to target for atomicity."""
+        tmp_path = filepath + ".tmp"
+        try:
+            with open(tmp_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4)
+            # Atomic replace
+            os.replace(tmp_path, filepath)
+        except Exception as e:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+            raise e
+
     def save_settings(self, settings):
-        with open(self.settings_file, 'w', encoding='utf-8') as f:
-            json.dump(settings, f, indent=4)
+        self._atomic_write(self.settings_file, settings)
 
     def _ensure_config_dir(self):
         if not os.path.exists(self.config_dir):
@@ -108,8 +120,7 @@ class ConfigManager:
             "verification_token": verification_token
         }
 
-        with open(self.profiles_file, 'w', encoding='utf-8') as f:
-            json.dump(profiles, f, indent=4)
+        self._atomic_write(self.profiles_file, profiles)
 
     def verify_profile_password(self, name, profile_password):
         """Verifies if the provided profile_password is correct for the profile."""
@@ -158,12 +169,10 @@ class ConfigManager:
         if name in profiles:
             profiles[name]["last_local_path"] = local_path
             profiles[name]["last_remote_path"] = remote_path
-            with open(self.profiles_file, 'w', encoding='utf-8') as f:
-                json.dump(profiles, f, indent=4)
+            self._atomic_write(self.profiles_file, profiles)
 
     def delete_profile(self, name):
         profiles = self.get_profiles()
         if name in profiles:
             del profiles[name]
-            with open(self.profiles_file, 'w', encoding='utf-8') as f:
-                json.dump(profiles, f, indent=4)
+            self._atomic_write(self.profiles_file, profiles)

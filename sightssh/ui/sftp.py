@@ -99,6 +99,32 @@ class SFTPPanel(wx.Panel):
 
         # Initialize
         wx.CallAfter(self.init_sftp)
+        
+        # Context Menu IDs
+        self.ID_UPLOAD = wx.NewIdRef()
+        self.ID_OPEN = wx.NewIdRef()
+        self.ID_L_DELETE = wx.NewIdRef()
+        self.ID_L_RENAME = wx.NewIdRef()
+        self.ID_L_MKDIR = wx.NewIdRef()
+        
+        self.ID_DOWNLOAD = wx.NewIdRef()
+        self.ID_R_DELETE = wx.NewIdRef()
+        self.ID_R_RENAME = wx.NewIdRef()
+        self.ID_R_MKDIR = wx.NewIdRef()
+        self.ID_PERMS = wx.NewIdRef()
+        
+        # Bind Context Menus ONCE
+        self.Bind(wx.EVT_MENU, self.do_upload, id=self.ID_UPLOAD)
+        self.Bind(wx.EVT_MENU, lambda e: self.on_local_enter(type('obj', (object,), {'GetIndex': lambda: self.local_list.GetFirstSelected()})()), id=self.ID_OPEN)
+        self.Bind(wx.EVT_MENU, self.do_local_delete, id=self.ID_L_DELETE)
+        self.Bind(wx.EVT_MENU, self.do_local_rename, id=self.ID_L_RENAME)
+        self.Bind(wx.EVT_MENU, self.do_local_mkdir, id=self.ID_L_MKDIR)
+        
+        self.Bind(wx.EVT_MENU, self.do_download, id=self.ID_DOWNLOAD)
+        self.Bind(wx.EVT_MENU, self.do_remote_delete, id=self.ID_R_DELETE)
+        self.Bind(wx.EVT_MENU, self.do_remote_rename, id=self.ID_R_RENAME)
+        self.Bind(wx.EVT_MENU, self.do_remote_mkdir, id=self.ID_R_MKDIR)
+        self.Bind(wx.EVT_MENU, self.do_remote_permissions, id=self.ID_PERMS)
 
     def init_sftp(self):
         try:
@@ -714,17 +740,11 @@ class SFTPPanel(wx.Panel):
 
     def on_local_menu(self, event):
         menu = wx.Menu()
-        menu.Append(101, tr("ctx_upload"))
-        menu.Append(102, tr("ctx_open"))
-        menu.Append(103, tr("ctx_delete"))
-        menu.Append(104, tr("ctx_rename"))
-        menu.Append(105, tr("ctx_mkdir"))
-        
-        self.Bind(wx.EVT_MENU, self.do_upload, id=101)
-        self.Bind(wx.EVT_MENU, lambda e: self.on_local_enter(type('obj', (object,), {'GetIndex': lambda: self.local_list.GetFirstSelected()})()), id=102)
-        self.Bind(wx.EVT_MENU, self.do_local_delete, id=103)
-        self.Bind(wx.EVT_MENU, self.do_local_rename, id=104)
-        self.Bind(wx.EVT_MENU, self.do_local_mkdir, id=105)
+        menu.Append(self.ID_UPLOAD, tr("ctx_upload"))
+        menu.Append(self.ID_OPEN, tr("ctx_open"))
+        menu.Append(self.ID_L_DELETE, tr("ctx_delete"))
+        menu.Append(self.ID_L_RENAME, tr("ctx_rename"))
+        menu.Append(self.ID_L_MKDIR, tr("ctx_mkdir"))
         
         self.PopupMenu(menu)
 
@@ -749,18 +769,12 @@ class SFTPPanel(wx.Panel):
 
     def on_remote_menu(self, event):
         menu = wx.Menu()
-        menu.Append(201, tr("ctx_download"))
-        menu.Append(202, tr("ctx_delete"))
-        menu.Append(203, tr("ctx_rename"))
-        menu.Append(204, tr("ctx_mkdir"))
+        menu.Append(self.ID_DOWNLOAD, tr("ctx_download"))
+        menu.Append(self.ID_R_DELETE, tr("ctx_delete"))
+        menu.Append(self.ID_R_RENAME, tr("ctx_rename"))
+        menu.Append(self.ID_R_MKDIR, tr("ctx_mkdir"))
         menu.AppendSeparator()
-        menu.Append(205, tr("lbl_permissions"))
-        
-        self.Bind(wx.EVT_MENU, self.do_download, id=201)
-        self.Bind(wx.EVT_MENU, self.do_remote_delete, id=202)
-        self.Bind(wx.EVT_MENU, self.do_remote_rename, id=203)
-        self.Bind(wx.EVT_MENU, self.do_remote_mkdir, id=204)
-        self.Bind(wx.EVT_MENU, self.do_remote_permissions, id=205)
+        menu.Append(self.ID_PERMS, tr("lbl_permissions"))
         
         self.PopupMenu(menu)
 
