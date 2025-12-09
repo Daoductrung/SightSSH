@@ -48,7 +48,19 @@ This software is designed to run completely offline and locally on your machine.
 3. Run the application:
    ```bash
    python -m sightssh.main
+   python -m sightssh.main
    ```
+
+## Building from Source (Create .exe)
+
+To create a standalone Windows executable (`.exe`):
+
+1. Double-click **`build.bat`**.
+2. Wait for the process to complete.
+   - Logs are saved to `install_log.txt` and `build_log.txt`.
+3. Find the `SightSSH.exe` file in the **`dist`** folder.
+
+You can now share or move `SightSSH.exe` anywhere; it is strictly portable.
 
 ## Contributing
 

@@ -14,8 +14,17 @@ class TranslationManager:
         return cls._instance
 
     def load_languages(self):
-        # Determine strict path relative to this file
-        base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        import sys
+        if getattr(sys, 'frozen', False):
+            # Running in PyInstaller bundle
+            # We expect assets to be at sys._MEIPASS/sightssh/assets/lang
+            # Or just sys._MEIPASS/assets/lang depending on how we package.
+            # We will package 'sightssh/assets' -> 'sightssh/assets'
+            base_path = os.path.join(sys._MEIPASS, "sightssh")
+        else:
+            # Running from source
+            base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            
         lang_path = os.path.join(base_path, "assets", "lang")
         
         for filename in os.listdir(lang_path):
