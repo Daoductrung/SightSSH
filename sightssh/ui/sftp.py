@@ -765,7 +765,7 @@ class SFTPPanel(wx.Panel):
                 os.rename(os.path.join(self.local_path, old_name), os.path.join(self.local_path, new_name))
                 self.refresh_local()
                 self.speech.speak(tr("msg_renamed"))
-            except Exception as e: wx.MessageBox(str(e))
+            except Exception as e: wx.MessageBox(tr("err_local").format(error=e), tr("err_title"))
 
     def on_remote_menu(self, event):
         menu = wx.Menu()
@@ -836,7 +836,7 @@ class SFTPPanel(wx.Panel):
                      error_msg += f"{name}: {e}\n"
             
             if error_msg:
-                wx.MessageBox(tr("err_multi_errors").format(errors=error_msg))
+                wx.MessageBox(tr("err_multi_errors").format(errors=error_msg), tr("err_title"))
             
             if count > 0:
                 self.speech.speak(tr("msg_perm_updated"))
@@ -861,7 +861,7 @@ class SFTPPanel(wx.Panel):
                 self.sftp.rename(self.remote_path + "/" + old_name, self.remote_path + "/" + new_name)
                 self.refresh_remote()
                 self.speech.speak(tr("msg_renamed"))
-            except Exception as e: wx.MessageBox(str(e))
+            except Exception as e: wx.MessageBox(tr("err_remote").format(error=e), tr("err_title"))
 
     def do_local_delete(self, event):
         items = self.get_selected_items(self.local_list)
@@ -965,6 +965,9 @@ class SFTPPanel(wx.Panel):
 
     def on_back_term(self, event):
          self.save_session_paths()
+         if self.sftp:
+             try: self.sftp.close()
+             except: pass
          self.GetParent().switch_to_terminal(self.ssh_client, self.details)
 
     def on_disconnect(self, event):

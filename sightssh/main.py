@@ -20,7 +20,7 @@ class SightSSHApp(wx.App):
         return True
 
 def main():
-    app = SightSSHApp()
+    app = SightSSHApp(redirect=False)
     app.MainLoop()
 
 if __name__ == "__main__":

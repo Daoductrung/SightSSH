@@ -4,7 +4,8 @@ import os
 from sightssh.core.i18n import tr
 
 class TransferProgressDialog(wx.Dialog):
-    def __init__(self, parent, title="File Transfer"):
+    def __init__(self, parent, title=None):
+        if title is None: title = tr("dlg_transfer_title")
         super().__init__(parent, title=title, size=(400, 200))
         self.is_cancelled = False
         self.sizer = wx.BoxSizer(wx.VERTICAL)
