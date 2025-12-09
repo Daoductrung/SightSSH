@@ -39,8 +39,9 @@ def setup_logging(log_dir):
         # Optional: Last ditch effort to show error UI
         try:
             import wx
+            from sightssh.core.i18n import tr
             err_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-            wx.MessageBox(f"Critical Error:\n{err_msg}", "Application Error", wx.ICON_ERROR)
+            wx.MessageBox(f"Critical Error:\n{err_msg}", tr("title_critical_error"), wx.ICON_ERROR)
         except:
             pass
 

@@ -219,5 +219,7 @@
     "lbl_version": "Version: {version}",
     "err_invalid_prof_pass": "Invalid Profile Password",
     "msg_confirm_exit_transfer": "A file transfer is in progress. Are you sure you want to exit?",
-    "title_confirm_exit": "Confirm Exit"
+    "title_confirm_exit": "Confirm Exit",
+    "prefix_copy": "copy_",
+    "title_critical_error": "Critical Error"
 }

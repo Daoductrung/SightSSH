@@ -219,5 +219,7 @@
     "lbl_version": "Phiên bản: {version}",
     "err_invalid_prof_pass": "Mật khẩu hồ sơ không hợp lệ",
     "msg_confirm_exit_transfer": "Đang có quá trình chuyển tệp. Bạn có chắc chắn muốn thoát?",
-    "title_confirm_exit": "Xác nhận thoát"
+    "title_confirm_exit": "Xác nhận thoát",
+    "prefix_copy": "ban_sao_",
+    "title_critical_error": "Lỗi Nghiêm Trọng"
 }

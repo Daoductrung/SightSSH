@@ -18,7 +18,7 @@ class ConflictDialog(wx.Dialog):
         # New Name Input (Hidden by default, used for Rename)
         self.rename_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.lbl_rename = wx.StaticText(self, label=tr("lbl_new_name"))
-        self.txt_rename = wx.TextCtrl(self, value=f"copy_{filename}")
+        self.txt_rename = wx.TextCtrl(self, value=f"{tr('prefix_copy')}{filename}")
         self.rename_sizer.Add(self.lbl_rename, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
         self.rename_sizer.Add(self.txt_rename, 1, wx.EXPAND)
         
