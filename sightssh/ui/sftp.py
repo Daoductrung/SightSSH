@@ -947,7 +947,7 @@ class SFTPPanel(wx.Panel):
              try:
                  os.mkdir(os.path.join(self.local_path, dlg.GetValue()))
                  self.refresh_local()
-             except Exception as e: wx.MessageBox(str(e))
+             except Exception as e: wx.MessageBox(tr("err_local").format(error=e), tr("err_title"))
 
     def do_remote_mkdir(self, event):
          dlg = wx.TextEntryDialog(self, tr("dlg_rename_msg"), tr("ctx_mkdir"))

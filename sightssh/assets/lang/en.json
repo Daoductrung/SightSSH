@@ -216,5 +216,6 @@
     "err_attr_read": "Error reading attributes: {error}",
     "err_multi_errors": "Errors:\n{errors}",
     "title_update": "SightSSH Update",
-    "lbl_version": "Version: {version}"
+    "lbl_version": "Version: {version}",
+    "err_invalid_prof_pass": "Invalid Profile Password"
 }

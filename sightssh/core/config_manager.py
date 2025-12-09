@@ -141,8 +141,11 @@ class ConfigManager:
         Returns full profile details including decrypted secret.
         Raises ValueError if password incorrect.
         """
+        # Lazy import to avoid circular dependency if set_language was in init
+        from sightssh.core.i18n import tr
+        
         if not self.verify_profile_password(name, profile_password):
-            raise ValueError("Invalid Profile Password")
+            raise ValueError(tr("err_invalid_prof_pass"))
 
         profiles = self.get_profiles()
         profile = profiles[name]

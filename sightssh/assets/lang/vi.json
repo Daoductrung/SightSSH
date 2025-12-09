@@ -216,5 +216,6 @@
     "err_attr_read": "Lỗi đọc thuộc tính: {error}",
     "err_multi_errors": "Các lỗi:\n{errors}",
     "title_update": "Cập nhật SightSSH",
-    "lbl_version": "Phiên bản: {version}"
+    "lbl_version": "Phiên bản: {version}",
+    "err_invalid_prof_pass": "Mật khẩu hồ sơ không hợp lệ"
 }
