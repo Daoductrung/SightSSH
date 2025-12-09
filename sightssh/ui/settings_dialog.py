@@ -49,6 +49,9 @@ class SettingsDialog(wx.Dialog):
         
         # Initial Population
         self.populate_values()
+        
+        # Set focus to first meaningful element
+        self.cmb_language.SetFocus()
 
     def populate_values(self):
         """Refreshes the UI with current settings from config."""

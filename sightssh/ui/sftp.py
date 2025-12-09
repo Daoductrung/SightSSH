@@ -3,8 +3,7 @@ import os
 import threading
 import stat
 import shutil
-import datetime
-import math
+import shutil
 from sightssh.accessibility.speech import SpeechManager
 from sightssh.core.i18n import tr
 from sightssh.ui.transfer_dialog import TransferProgressDialog

@@ -1,6 +1,7 @@
 import threading
 import paramiko
 import time
+import logging
 
 class SightSSHClient:
     def __init__(self):
@@ -12,6 +13,7 @@ class SightSSHClient:
         self._reading = False
         self.on_data_callback = None
         self.on_error_callback = None
+        self.on_disconnected_callback = None
 
     def connect(self, host, port, username, password=None, key_filename=None, passphrase=None, keep_alive=30):
         """
@@ -19,6 +21,7 @@ class SightSSHClient:
         Raises paramiko exceptions on failure.
         """
         try:
+            logging.info(f"Connecting to {host}:{port} as {username} (Auth: {'Key' if key_filename else 'Password'})...")
             self.client.connect(
                 hostname=host,
                 port=int(port),
@@ -32,12 +35,14 @@ class SightSSHClient:
             )
             self.transport = self.client.get_transport()
             self._connected = True
+            logging.info("SSH Connection Established.")
             
             # Start keepalive to prevent timeouts
             if keep_alive > 0:
                 self.transport.set_keepalive(keep_alive)
             
         except Exception as e:
+            logging.error(f"SSH Connection Failed: {e}")
             self._connected = False
             raise e
 

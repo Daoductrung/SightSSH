@@ -2,20 +2,17 @@
 import sys
 import traceback
 import os
+import time
 
 sys.path.insert(0, os.getcwd())
-
-with open("status.txt", "w") as f:
-    f.write("STARTING\n")
+print("DEBUG: Script started", flush=True)
 
 try:
+    print("DEBUG: Importing main", flush=True)
     from sightssh.main import main
-    with open("status.txt", "a") as f:
-        f.write("IMPORTED\n")
+    print("DEBUG: Running main()", flush=True)
     main()
-    with open("status.txt", "a") as f:
-        f.write("FINISHED\n")
+    print("DEBUG: main() returned", flush=True)
 except Exception:
-    with open("crash.log", "w") as f:
-        f.write(traceback.format_exc())
-    sys.exit(1)
+    print("DEBUG: Exception caught", flush=True)
+    traceback.print_exc()
