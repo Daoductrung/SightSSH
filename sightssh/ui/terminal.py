@@ -76,9 +76,14 @@ class TerminalPanel(wx.Panel):
         if self.output_type == "textbox":
             # Standard Mode: Editable (for SR support) but Input intercepted
             # Dedicated Mode: ReadOnly
-            # TE_PROCESS_TAB ensures Tab doesn't jump focus.
-            style = wx.TE_MULTILINE | wx.TE_RICH2 | wx.TE_PROCESS_TAB | wx.TE_PROCESS_ENTER
-            if self.interaction_mode != "standard":
+             
+            style = wx.TE_MULTILINE | wx.TE_RICH2 | wx.TE_PROCESS_ENTER
+            
+            # TE_PROCESS_TAB ensures Tab doesn't jump focus in Standard Mode (Shell behavior)
+            # But in Dedicated mode, we want Tab to navigate between Output and Input.
+            if self.interaction_mode == "standard":
+                style |= wx.TE_PROCESS_TAB
+            else:
                 style |= wx.TE_READONLY
                 
             self.output_ctrl = wx.TextCtrl(self, style=style, name=tr("lbl_messages"))
@@ -125,6 +130,37 @@ class TerminalPanel(wx.Panel):
             threading.Thread(target=self.do_connect, daemon=True).start()
             
         self.Bind(wx.EVT_SET_FOCUS, self.on_set_focus)
+        self.Bind(wx.EVT_SIZE, self.on_resize)
+
+    def on_resize(self, event):
+        """Handle window resize and send SIGWINCH."""
+        event.Skip()
+        if not self.client or not self.client._connected: return
+        
+        # Calculate rows/cols
+        # This is an approximation. For exactness we'd need ClientSize / CharSize
+        # But many terminals just send a reasonable guess or let the remote side handle flow.
+        # Paramiko resize_pty takes (width=80, height=24) -> (cols, rows)
+        
+        # We need font metrics.
+        dc = wx.ClientDC(self.output_ctrl)
+        font = self.output_ctrl.GetFont()
+        dc.SetFont(font)
+        char_w, char_h = dc.GetTextExtent("M")
+        
+        if char_w > 0 and char_h > 0:
+             w, h = self.output_ctrl.GetClientSize()
+             cols = max(80, int(w / char_w))
+             rows = max(24, int(h / char_h))
+             
+             # Debounce or just try fire?
+             # Paramiko expects resize_pty(width=cols, height=rows)
+             try:
+                 # Note: paramiko invokes transport.global_request('window-change', ...)
+                 # But we need to use the channel if exposed, or add wrapper in SightSSHClient
+                 # self.client.resize_pty(cols, rows) -> We need to verify this method exists!
+                 self.client.resize_terminal(cols, rows)
+             except: pass
 
     def on_set_focus(self, event):
         """Explicitly set focus to the correct control when panel gets focus."""
@@ -188,7 +224,7 @@ class TerminalPanel(wx.Panel):
         msg = tr("err_connection_failed").format(error=error_msg)
         self.status.SetLabel(msg)
         self.speech.speak(msg)
-        wx.MessageBox(msg, tr("app_title"), wx.ICON_ERROR)
+        wx.MessageBox(msg, tr("err_title"), wx.ICON_ERROR)
         wx.CallAfter(self.GetParent().on_connection_error, self.details)
 
     def on_rx_data(self, data):
@@ -403,24 +439,50 @@ class TerminalPanel(wx.Panel):
 
     def on_output_char(self, event):
         """Forwards typing in read-only output to command input."""
-        key = event.GetKeyCode()
-        # Ignore modifiers alone
-        if key == wx.WXK_NONE: 
+        key_code = event.GetKeyCode()
+        uni_key = event.GetUnicodeKey()
+        
+        # Ignore modifiers alone or Shortcuts (Ctrl+C, etc)
+        if event.CmdDown() or event.AltDown() or key_code == wx.WXK_NONE:
             event.Skip()
             return
             
-        self.cmd_input.SetFocus()
-        self.cmd_input.SetInsertionPointEnd()
+        # Only forward printable characters (and Backspace)
+        # GetUnicodeKey returns WXK_NONE (0) for special keys (Arrows, F1-12, Home/End...)
         
-        # Handle simple char injection
-        if key == wx.WXK_BACK:
-             val = self.cmd_input.GetValue()
-             if val: 
-                 self.cmd_input.SetValue(val[:-1])
-                 self.cmd_input.SetInsertionPointEnd()
-        elif 32 <= key < 127:
-             self.cmd_input.AppendText(chr(key))
+        should_forward = False
+        char_to_append = ""
+        is_backspace = False
+        
+        if key_code == wx.WXK_BACK:
+             should_forward = True
+             is_backspace = True
+        elif uni_key != wx.WXK_NONE: 
+             # It is a true character (ASCII or Unicode)
+             # Filter out control codes < 32 (like Enter=13, Esc=27) if they end up here?
+             # Usually Char event handles them. We might want to pass Enter?
+             # If user presses Enter in Output, they might expect command execution?
+             # But Enter is key_code 13.
+             if uni_key >= 32:
+                 should_forward = True
+                 char_to_append = chr(uni_key)
+             
+        if should_forward:
+             self.cmd_input.SetFocus()
              self.cmd_input.SetInsertionPointEnd()
+             
+             if is_backspace:
+                 val = self.cmd_input.GetValue()
+                 if val: 
+                     self.cmd_input.SetValue(val[:-1])
+                     self.cmd_input.SetInsertionPointEnd()
+             elif char_to_append:
+                 self.cmd_input.AppendText(char_to_append)
+                 self.cmd_input.SetInsertionPointEnd()
+        else:
+             # It is a special key (Arrow, PageUp, etc) or unhandled control char
+             # Allow default behavior (Navigation/Scrolling)
+             event.Skip()
 
     def on_copy(self, event):
         if self.output_type == "textbox":

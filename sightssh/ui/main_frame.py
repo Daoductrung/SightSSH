@@ -5,7 +5,7 @@ from sightssh import __version__
 
 class MainFrame(wx.Frame):
     def __init__(self):
-        super().__init__(parent=None, title=f"SightSSH v{__version__}", size=(800, 600))
+        super().__init__(parent=None, title=f"{tr('app_title')} v{__version__}", size=(800, 600))
         self.speech = SpeechManager()
         self.panel = wx.Panel(self)
         
@@ -19,13 +19,13 @@ class MainFrame(wx.Frame):
         
         # Settings
         settings_menu = wx.Menu()
-        settings_item = settings_menu.Append(wx.ID_PREFERENCES, tr("menu_settings"), "Configure SightSSH")
+        settings_item = settings_menu.Append(wx.ID_PREFERENCES, tr("menu_settings"), tr("hlp_configure"))
         menu_bar.Append(settings_menu, tr("menu_settings"))
         
         # Help
         help_menu = wx.Menu()
-        help_item = help_menu.Append(wx.ID_HELP, tr("dlg_help_title"), "View Shortcuts")
-        about_item = help_menu.Append(wx.ID_ABOUT, tr("btn_about"), "About SightSSH")
+        help_item = help_menu.Append(wx.ID_HELP, tr("dlg_help_title"), tr("hlp_view_shortcuts"))
+        about_item = help_menu.Append(wx.ID_ABOUT, tr("btn_about"), tr("hlp_about_sightssh"))
         menu_bar.Append(help_menu, tr("menu_help"))
 
         self.SetMenuBar(menu_bar)
@@ -272,5 +272,5 @@ class MainFrame(wx.Frame):
              from sightssh.ui.profile_editor import ProfileEditorPanel
              self.switch_to_panel(ProfileEditorPanel, profile_name=profile_name, existing_data=connection_details, profile_password=None) 
         else:
-             wx.MessageBox("Unknown profile error.", "Error")
+             wx.MessageBox(tr("err_unknown_profile"), "Error")
              self.show_welcome_screen()

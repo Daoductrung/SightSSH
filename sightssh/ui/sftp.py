@@ -129,7 +129,7 @@ class SFTPPanel(wx.Panel):
     def init_sftp(self):
         try:
             self.sftp = self.ssh_client.open_sftp()
-            if not self.sftp: raise Exception("SFTP failed")
+            if not self.sftp: raise Exception(tr("err_sftp_failed"))
             try:
                 # Try to Restore, else default to .
                 self.sftp.chdir(self.remote_path)
@@ -143,7 +143,7 @@ class SFTPPanel(wx.Panel):
             self.local_list.SetFocus()
             self.speech.speak(tr("msg_sftp_ready_speech"))
         except Exception as e:
-            wx.MessageBox(f"SFTP Error: {e}", "Error")
+            wx.MessageBox(tr("err_sftp_gen_error").format(error=e), tr("err_title"))
             self.on_back_term(None)
 
     def refresh_lists(self):
@@ -160,7 +160,7 @@ class SFTPPanel(wx.Panel):
         
         # Local
         self.local_list.DeleteAllColumns()
-        self.local_list.InsertColumn(0, "Name", width=150)
+        self.local_list.InsertColumn(0, tr("lbl_name"), width=150)
         self.local_indices = [] # Stores which data index goes to which column (starting from col 1)
         
         # Local Map: (key, label, data_index)
@@ -176,7 +176,7 @@ class SFTPPanel(wx.Panel):
                 
         # Remote
         self.remote_list.DeleteAllColumns()
-        self.remote_list.InsertColumn(0, "Name", width=150)
+        self.remote_list.InsertColumn(0, tr("lbl_name"), width=150)
         self.remote_indices = []
         
         # Remote Data Indices: 0=Name, 1=Size, 2=Type, 3=Modified, 4=Perms, 5=Owner, 6=Group
@@ -446,7 +446,7 @@ class SFTPPanel(wx.Panel):
                         self.sftp.mkdir(remote_dir)
                         
                     for name in os.listdir(local_dir):
-                        if dlg.is_cancelled: raise Exception("Cancelled")
+                        if dlg.is_cancelled: raise Exception(tr("err_cancelled"))
                         l_path = os.path.join(local_dir, name)
                         r_path = remote_dir + "/" + name
                         
@@ -530,7 +530,7 @@ class SFTPPanel(wx.Panel):
                     wx.CallAfter(self.speech.speak, tr("err_transfer_cancelled"))
             except Exception as e:
                 wx.CallAfter(dlg.Destroy)
-                wx.CallAfter(wx.MessageBox, str(e), "Error")
+                wx.CallAfter(wx.MessageBox, str(e), tr("err_title"))
                 
         threading.Thread(target=run_upload, daemon=True).start()
 
@@ -644,7 +644,7 @@ class SFTPPanel(wx.Panel):
                     wx.CallAfter(self.speech.speak, tr("err_transfer_cancelled"))
             except Exception as e:
                  wx.CallAfter(dlg.Destroy)
-                 wx.CallAfter(wx.MessageBox, str(e), "Error")
+                 wx.CallAfter(wx.MessageBox, str(e), tr("err_title"))
 
         threading.Thread(target=run_download, daemon=True).start()
         
@@ -667,7 +667,7 @@ class SFTPPanel(wx.Panel):
                 os.startfile(path)
                 self.speech.speak(tr("msg_opening_file"))
             except Exception as e:
-                wx.MessageBox(str(e), "Error")
+                wx.MessageBox(str(e), tr("err_title"))
 
     def on_remote_enter(self, event):
         idx = event.GetIndex()
@@ -681,7 +681,7 @@ class SFTPPanel(wx.Panel):
                 self.speech.speak(tr("msg_up_dir"))
             except Exception as e:
                 self.play_beep("error")
-                wx.MessageBox(str(e), "Error")
+                wx.MessageBox(str(e), tr("err_title"))
         elif item.startswith("[") and item.endswith("]"):
             dirname = item[1:-1]
             try:
@@ -691,7 +691,7 @@ class SFTPPanel(wx.Panel):
                 self.speech.speak(tr("msg_entered").format(name=dirname))
             except Exception as e:
                 self.play_beep("error")
-                wx.MessageBox(str(e), "Error")
+                wx.MessageBox(str(e), tr("err_title"))
         else:
             self.do_download(None)
 
@@ -799,7 +799,7 @@ class SFTPPanel(wx.Panel):
                      has_dir = True
                      break
         except Exception as e:
-            wx.MessageBox(f"Error reading attributes: {e}")
+            wx.MessageBox(tr("err_attr_read").format(error=e), tr("err_title"))
             return
 
         dlg = PermissionsDialog(self, first_mode, show_recursive=has_dir)
@@ -836,7 +836,7 @@ class SFTPPanel(wx.Panel):
                      error_msg += f"{name}: {e}\n"
             
             if error_msg:
-                wx.MessageBox(f"Errors:\n{error_msg}")
+                wx.MessageBox(tr("err_multi_errors").format(errors=error_msg))
             
             if count > 0:
                 self.speech.speak(tr("msg_perm_updated"))

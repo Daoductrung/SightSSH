@@ -80,17 +80,17 @@ class ProfileListPanel(wx.Panel):
             self.speech.speak(tr("msg_profile_unlocked"))
             return default_key
 
-        dlg = PasswordDialog(self, title=f"Unlock {profile_name}", message=f"Enter password for profile '{profile_name}':")
+        dlg = PasswordDialog(self, title=tr("title_unlock").format(name=profile_name), message=tr("msg_enter_pass_for").format(name=profile_name))
         if dlg.ShowModal() == wx.ID_OK:
             pwd = dlg.get_password()
             dlg.Destroy()
             
             if self.config.verify_profile_password(profile_name, pwd):
-                self.speech.speak("Password correct.")
+                self.speech.speak(tr("msg_password_correct"))
                 return pwd
             else:
-                self.speech.speak("Incorrect password.")
-                wx.MessageBox("Incorrect password", "Error")
+                self.speech.speak(tr("msg_incorrect_pass"))
+                wx.MessageBox(tr("msg_incorrect_pass"), tr("err_title"))
                 return None
         dlg.Destroy()
         return None
@@ -114,10 +114,10 @@ class ProfileListPanel(wx.Panel):
                 if hasattr(self.GetParent(), 'start_session'):
                     self.GetParent().start_session(details)
                 else:
-                    wx.MessageBox("Connection logic implementation pending.", "Info")
+                    wx.MessageBox(tr("msg_not_implemented"), "Info")
 
             except Exception as e:
-                 wx.MessageBox(f"Failed to load profile: {e}", "Error")
+                 wx.MessageBox(tr("err_load_profile").format(error=e), tr("err_title"))
 
     def on_edit(self, event):
         name = self.get_selected_profile()

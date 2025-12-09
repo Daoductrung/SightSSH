@@ -20,6 +20,7 @@ class TransferProgressDialog(wx.Dialog):
         self.SetSizer(self.sizer)
         
         self.btn_cancel.Bind(wx.EVT_BUTTON, self.on_cancel)
+        self.Bind(wx.EVT_CLOSE, self.on_cancel)
         self.btn_cancel.SetFocus()
         self.CenterOnParent()
         

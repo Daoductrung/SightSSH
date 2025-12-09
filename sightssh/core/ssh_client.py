@@ -97,6 +97,10 @@ class SightSSHClient:
         if self.channel and not self.channel.closed:
             self.channel.resize_pty(width=width, height=height)
 
+    def resize_terminal(self, cols, rows):
+        """Alias for resize to match UI calls."""
+        self.resize(cols, rows)
+
     def open_sftp(self):
         """Returns an SFTPClient session."""
         if self._connected and self.transport:

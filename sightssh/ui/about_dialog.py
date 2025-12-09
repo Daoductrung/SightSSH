@@ -16,7 +16,7 @@ class AboutDialog(wx.Dialog):
         sizer.Add(lbl_msg, 0, wx.ALL | wx.CENTER, 15)
         
         # Version
-        lbl_ver = wx.StaticText(self, label=f"Version: {__version__}")
+        lbl_ver = wx.StaticText(self, label=tr("lbl_version").format(version=__version__))
         sizer.Add(lbl_ver, 0, wx.ALL | wx.CENTER, 5)
         
         lbl_created = wx.StaticText(self, label=tr("lbl_created_by"))

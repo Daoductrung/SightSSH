@@ -171,6 +171,13 @@ class ProfileEditorPanel(wx.Panel):
             wx.MessageBox(tr("msg_fill_required"), tr("app_title"), wx.ICON_WARNING)
             return
 
+        try:
+            port_val = int(port)
+            if port_val < 1 or port_val > 65535: raise ValueError("Port range")
+        except ValueError:
+            wx.MessageBox(tr("err_invalid_port"), tr("app_title"), wx.ICON_WARNING)
+            return
+
         final_prof_pass = ""
         if is_protected:
             if not prof_pass:
@@ -190,11 +197,11 @@ class ProfileEditorPanel(wx.Panel):
             self.config.save_profile(
                 name=name,
                 host=host,
-                port=int(port),
+                port=port_val,
                 username=user,
                 auth_type=auth_type,
                 secret=secret,
-                key_path="", 
+                key_path=secret if auth_type == "key" else "", # Use secret field for path if key selected
                 profile_password=final_prof_pass
             )
             self.speech.speak(tr("msg_profile_saved"))

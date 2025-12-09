@@ -4,7 +4,7 @@ from sightssh.core.i18n import tr
 
 class UpdateDialog(wx.Dialog):
     def __init__(self, parent, current_version, new_version, changelog):
-        super().__init__(parent, title="SightSSH Update", size=(500, 400))
+        super().__init__(parent, title=tr("title_update"), size=(500, 400))
         
         sizer = wx.BoxSizer(wx.VERTICAL)
         
