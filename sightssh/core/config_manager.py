@@ -55,7 +55,18 @@ class ConfigManager:
         try:
             with open(self.settings_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except: return {}
+        except (json.JSONDecodeError, IOError):
+            # Backup corrupted file
+            try:
+                import shutil
+                from datetime import datetime
+                ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                backup = f"{self.settings_file}.corrupt_{ts}"
+                shutil.copy2(self.settings_file, backup)
+                import logging
+                logging.error(f"Settings file corrupted. Backed up to {backup}")
+            except: pass
+            return {}
 
     def _atomic_write(self, filepath, data):
         """Writes data to a temp file then renames to target for atomicity."""
@@ -88,6 +99,16 @@ class ConfigManager:
             with open(self.profiles_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except (json.JSONDecodeError, IOError):
+             # Backup corrupted file
+            try:
+                import shutil
+                from datetime import datetime
+                ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                backup = f"{self.profiles_file}.corrupt_{ts}"
+                shutil.copy2(self.profiles_file, backup)
+                import logging
+                logging.error(f"Profiles file corrupted. Backed up to {backup}")
+            except: pass
             return {}
 
     def save_profile(self, name, host, port, username, auth_type, secret, key_path, profile_password):
