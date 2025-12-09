@@ -1,10 +1,11 @@
 import wx
 from sightssh.accessibility.speech import SpeechManager
 from sightssh.core.i18n import tr
+from sightssh import __version__
 
 class MainFrame(wx.Frame):
     def __init__(self):
-        super().__init__(parent=None, title="SightSSH", size=(800, 600))
+        super().__init__(parent=None, title=f"SightSSH v{__version__}", size=(800, 600))
         self.speech = SpeechManager()
         self.panel = wx.Panel(self)
         
@@ -171,7 +172,13 @@ class MainFrame(wx.Frame):
         dlg = getattr(self, 'settings_dlg', None)
         if dlg:
             dlg.Destroy()
+            
+        # Attempt graceful close
         self.Close()
+        
+        # Force kill after short delay if threads hang
+        import os
+        os._exit(0)
 
     def switch_to_panel(self, panel_class, **kwargs):
         """Switches the content of the main frame to a new panel."""

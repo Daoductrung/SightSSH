@@ -154,6 +154,25 @@ class SettingsDialog(wx.Dialog):
         panel = self.tab_terminal
         sizer = wx.BoxSizer(wx.VERTICAL)
         
+        # Font (Grouped)
+        sb_font = wx.StaticBox(panel, label=tr("lbl_font"))
+        font_sizer = wx.StaticBoxSizer(sb_font, wx.VERTICAL)
+        
+        self.picker_font = wx.FontPickerCtrl(panel, style=wx.FNTP_FONTDESC_AS_LABEL | wx.FNTP_USEFONT_FOR_LABEL, name=tr("lbl_font"))
+        
+        # Load current font
+        curr_face = self.settings.get("font_face", "Consolas")
+        curr_size = self.settings.get("font_size", 12)
+        font = wx.Font(curr_size, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, faceName=curr_face)
+        if not font.IsOk():
+            font = wx.Font(12, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+            
+        self.picker_font.SetSelectedFont(font)
+        self.picker_font.SetToolTip(tr("desc_font"))
+        
+        font_sizer.Add(self.picker_font, 1, wx.EXPAND | wx.ALL, 5)
+        sizer.Add(font_sizer, 0, wx.EXPAND | wx.ALL, 10)
+
         # Keep Alive
         ka_text = tr("lbl_keep_alive")
         ka_desc = tr("desc_keep_alive")
@@ -341,6 +360,13 @@ class SettingsDialog(wx.Dialog):
                 if chk.GetValue():
                     verb_list.append(opt)
             new_settings["verbosity"] = verb_list
+
+            # Font
+            font = self.picker_font.GetSelectedFont()
+            if font.IsOk():
+                new_settings["font_face"] = font.GetFaceName()
+                new_settings["font_size"] = font.GetPointSize()
+
             
             # Save
             self.config.save_settings(new_settings)

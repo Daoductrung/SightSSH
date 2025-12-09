@@ -22,28 +22,35 @@ class AboutDialog(wx.Dialog):
         lbl_created = wx.StaticText(self, label=tr("lbl_created_by"))
         sizer.Add(lbl_created, 0, wx.ALL | wx.CENTER, 5)
         
-        # Contact Info Group
-        sb = wx.StaticBox(self, label=tr("lbl_contact_info"))
-        sb_sizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+        # Contact Info (List)
+        self.list_ctrl = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        self.list_ctrl.InsertColumn(0, tr("lbl_type"), width=100)
+        self.list_ctrl.InsertColumn(1, tr("col_description"), width=250)
         
-        # Email
-        self.lbl_email = wx.TextCtrl(sb, value="trung@ddt.one", style=wx.TE_READONLY | wx.TE_CENTER | wx.BORDER_NONE)
-        self.lbl_email.SetBackgroundColour(self.GetBackgroundColour())
+        # Data
+        self.contacts = [
+            (tr("lbl_email"), "trung@ddt.one", "mailto:trung@ddt.one"),
+            (tr("lbl_website"), "ddt.one/contact", "https://ddt.one/contact")
+        ]
         
-        # Website Link
-        self.lbl_website = wx.adv.HyperlinkCtrl(sb, label="ddt.one/contact", url="https://ddt.one/contact")
+        for i, (kind, display, url) in enumerate(self.contacts):
+            self.list_ctrl.InsertItem(i, kind)
+            self.list_ctrl.SetItem(i, 1, display)
+            
+        sizer.Add(self.list_ctrl, 1, wx.EXPAND | wx.ALL, 15)
         
-        sb_sizer.Add(wx.StaticText(sb, label=tr("lbl_email") + ":"), 0, wx.ALIGN_CENTER | wx.TOP, 10)
-        sb_sizer.Add(self.lbl_email, 0, wx.ALIGN_CENTER | wx.BOTTOM, 10)
-        
-        sb_sizer.Add(wx.StaticText(sb, label=tr("lbl_website") + ":"), 0, wx.ALIGN_CENTER | wx.TOP, 10)
-        sb_sizer.Add(self.lbl_website, 0, wx.ALIGN_CENTER | wx.BOTTOM, 10)
-        
-        sizer.Add(sb_sizer, 0, wx.EXPAND | wx.ALL, 15)
+        # Bindings
+        self.list_ctrl.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_item_activated)
         
         btn_close = wx.Button(self, wx.ID_OK, label=tr("btn_close"))
         sizer.Add(btn_close, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         
         self.SetSizer(sizer)
         self.CenterOnParent()
-        btn_close.SetFocus()
+        self.list_ctrl.SetFocus()
+
+    def on_item_activated(self, event):
+        idx = event.GetIndex()
+        if idx != wx.NOT_FOUND:
+            url = self.contacts[idx][2]
+            webbrowser.open(url)

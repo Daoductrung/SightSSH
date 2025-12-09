@@ -65,7 +65,13 @@ class TerminalPanel(wx.Panel):
         else:
              self.output_type = self.settings.get("output_type", "listbox")
 
-        font = wx.Font(12, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+
+
+        # Font
+        face = self.settings.get("font_face", "Consolas")
+        size = self.settings.get("font_size", 12)
+        font = wx.Font(size, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, faceName=face)
+        if not font.IsOk(): font = wx.Font(12, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         
         if self.output_type == "textbox":
             # Standard Mode: Editable (for SR support) but Input intercepted
@@ -129,14 +135,21 @@ class TerminalPanel(wx.Panel):
         """Forces focus to the active input element and restores visibility."""
         if self.interaction_mode == "standard" and self.output_ctrl:
             def _restore():
-                # Force repaint of the text control itself
-                self.output_ctrl.Refresh()
-                self.output_ctrl.Update()
-                self.output_ctrl.SetFocus()
-                self.output_ctrl.ShowPosition(self.output_ctrl.GetLastPosition())
+                try:
+                    if not self.output_ctrl: return 
+                    # Force repaint of the text control itself
+                    self.output_ctrl.Refresh()
+                    self.output_ctrl.Update()
+                    self.output_ctrl.SetFocus()
+                    self.output_ctrl.ShowPosition(self.output_ctrl.GetLastPosition())
+                except RuntimeError:
+                    pass # Control deleted
             wx.CallAfter(_restore)
         elif self.cmd_input:
-            wx.CallAfter(self.cmd_input.SetFocus)
+            def _restore_cmd():
+                try: self.cmd_input.SetFocus()
+                except RuntimeError: pass
+            wx.CallAfter(_restore_cmd)
 
     def do_connect(self):
         try:
@@ -217,8 +230,11 @@ class TerminalPanel(wx.Panel):
         # Visual Update: TextBox updates immediately (Character/Partial support)
         if self.output_type == "textbox":
             display_text = text.replace('\r', '')
-            self.output_ctrl.AppendText(display_text)
-            self.output_ctrl.ShowPosition(self.output_ctrl.GetLastPosition())
+            try:
+                self.output_ctrl.AppendText(display_text)
+                self.output_ctrl.ShowPosition(self.output_ctrl.GetLastPosition())
+            except RuntimeError:
+                pass
 
         # Speech & ListBox Logic: Buffer until full line (To avoid spamming/fragmentation)
         self.line_buffer += text
@@ -297,10 +313,13 @@ class TerminalPanel(wx.Panel):
         # Send everything we catch here.
         # This includes Enter (13), Backspace (8), and regular chars.
         # We do NOT call event.Skip() to prevent local text ctrl update.
-        if key < 256:
-             try:
-                 self.client.send(chr(key).encode('utf-8'))
-             except: pass
+        # Send everything we catch here.
+        # This includes Enter (13), Backspace (8), and regular chars.
+        # We do NOT call event.Skip() to prevent local text ctrl update.
+        # ALLOW UNICODE: key can be > 255 (e.g. Vietnamese)
+        try:
+            self.client.send(chr(key).encode('utf-8'))
+        except: pass
 
     def on_term_paste(self, event):
         """Standard Mode: Paste clipboard to server"""

@@ -98,7 +98,7 @@ class ProfileListPanel(wx.Panel):
     def on_connect(self, event):
         name = self.get_selected_profile()
         if not name:
-            self.speech.speak("No profile selected.")
+            self.speech.speak(tr("msg_no_profile"))
             return
 
         self.speech.speak(tr("msg_verifying"))
@@ -138,16 +138,19 @@ class ProfileListPanel(wx.Panel):
             
         pwd = self.prompt_profile_password(name)
         if pwd:
-            confirm = wx.MessageBox(f"Are you sure you want to delete '{name}'?", "Confirm", wx.YES_NO | wx.ICON_WARNING)
-            if confirm == wx.YES:
-                self.config.delete_profile(name)
-                # Refresh list
-                self.profiles = self.config.get_profiles()
-                self.profile_names = list(self.profiles.keys())
-                self.list_box.Set(self.profile_names)
-                if self.profile_names:
-                    self.list_box.SetSelection(0)
-                self.speech.speak("Profile deleted.")
+            settings = self.config.get_settings()
+            if settings.get("confirm_delete", False):
+                if wx.MessageBox(tr("msg_confirm_del_profile").format(name=name), tr("app_title"), wx.YES_NO | wx.ICON_WARNING) != wx.YES:
+                    return
+
+            self.config.delete_profile(name)
+            # Refresh list
+            self.profiles = self.config.get_profiles()
+            self.profile_names = list(self.profiles.keys())
+            self.list_box.Set(self.profile_names)
+            if self.profile_names:
+                self.list_box.SetSelection(0)
+            self.speech.speak(tr("msg_profile_deleted"))
 
     def on_back(self, event):
         # Go back to Welcome Screen

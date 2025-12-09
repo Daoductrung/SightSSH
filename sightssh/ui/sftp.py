@@ -21,6 +21,7 @@ class SFTPPanel(wx.Panel):
         self.config = ConfigManager()
         self.settings = self.config.get_settings()
         self.sftp = None
+        self.transfer_dlg = None
         self.local_path = os.path.expanduser("~")
         self.remote_path = "."
         
@@ -238,7 +239,7 @@ class SFTPPanel(wx.Panel):
             
             self._populate_list(self.local_list, data_list + dirs + files, self.local_indices)
         except Exception as e:
-            self.speech.speak(f"Local Error: {e}")
+            self.speech.speak(tr("err_local").format(error=e))
 
     def refresh_remote(self):
         try:
@@ -286,7 +287,7 @@ class SFTPPanel(wx.Panel):
             
             self._populate_list(self.remote_list, data_list + dirs + files, self.remote_indices)
         except Exception as e:
-            self.speech.speak(f"Remote Error: {e}")
+            self.speech.speak(tr("err_remote").format(error=e))
 
     def play_beep(self, pitch="start"):
         import winsound
@@ -380,24 +381,25 @@ class SFTPPanel(wx.Panel):
         if wx.GetKeyState(wx.WXK_CONTROL):
              item = event.GetItem()
              text = self.strip_brackets(item.GetText())
-             self.speech.speak(f"Selected {text}")
+             self.speech.speak(tr("msg_selected").format(text=text))
         elif wx.GetKeyState(wx.WXK_SHIFT):
-             self.speech.speak("Selection extended")
+             self.speech.speak(tr("msg_selection_extended"))
 
     def on_remote_select(self, event):
         if wx.GetKeyState(wx.WXK_CONTROL):
              item = event.GetItem()
              text = self.strip_brackets(item.GetText())
-             self.speech.speak(f"Selected {text}")
+             self.speech.speak(tr("msg_selected").format(text=text))
         elif wx.GetKeyState(wx.WXK_SHIFT):
-             self.speech.speak("Selection extended")
+             self.speech.speak(tr("msg_selection_extended"))
 
     # TRANSFER OPERATIONS
     def do_upload(self, event):
         items = self.get_selected_items(self.local_list)
         if not items: return
         
-        dlg = TransferProgressDialog(self, tr("msg_uploading"))
+        self.transfer_dlg = TransferProgressDialog(self, tr("msg_uploading"))
+        dlg = self.transfer_dlg
         dlg.Show()
         
         def run_upload():
@@ -495,9 +497,9 @@ class SFTPPanel(wx.Panel):
                 if count > 0:
                     self.play_beep("end")
                     wx.CallAfter(self.refresh_remote)
-                    wx.CallAfter(self.speech.speak, f"Uploaded {count} items.")
+                    wx.CallAfter(self.speech.speak, tr("msg_uploaded").format(count=count))
                 elif last_error:
-                    wx.CallAfter(wx.MessageBox, f"Upload Error: {last_error}", "Error")
+                    wx.CallAfter(wx.MessageBox, tr("err_upload").format(error=last_error), tr("app_title"), wx.ICON_ERROR)
                 else:
                     wx.CallAfter(self.speech.speak, tr("err_transfer_cancelled"))
             except Exception as e:
@@ -510,7 +512,8 @@ class SFTPPanel(wx.Panel):
         items = self.get_selected_items(self.remote_list)
         if not items: return
         
-        dlg = TransferProgressDialog(self, tr("msg_downloading"))
+        self.transfer_dlg = TransferProgressDialog(self, tr("msg_downloading"))
+        dlg = self.transfer_dlg
         dlg.Show()
         
         def run_download():
@@ -608,11 +611,11 @@ class SFTPPanel(wx.Panel):
                 if count > 0:
                     self.play_beep("end")
                     wx.CallAfter(self.refresh_local)
-                    wx.CallAfter(self.speech.speak, f"Downloaded {count} items.")
+                    wx.CallAfter(self.speech.speak, tr("msg_downloaded").format(count=count))
                 elif last_error:
-                    wx.CallAfter(wx.MessageBox, f"Download Error: {last_error}", "Error")
+                    wx.CallAfter(wx.MessageBox, tr("err_download").format(error=last_error), tr("app_title"), wx.ICON_ERROR)
                 else:
-                    wx.CallAfter(self.speech.speak, "Download cancelled.")
+                    wx.CallAfter(self.speech.speak, tr("err_transfer_cancelled"))
             except Exception as e:
                  wx.CallAfter(dlg.Destroy)
                  wx.CallAfter(wx.MessageBox, str(e), "Error")
@@ -626,17 +629,17 @@ class SFTPPanel(wx.Panel):
         if item == "[..]":
             self.local_path = os.path.dirname(self.local_path)
             self.refresh_local()
-            self.speech.speak(f"Up to {os.path.basename(self.local_path)}")
+            self.speech.speak(tr("msg_up_to").format(name=os.path.basename(self.local_path)))
         elif item.startswith("[") and item.endswith("]"):
             dirname = item[1:-1]
             self.local_path = os.path.join(self.local_path, dirname)
             self.refresh_local()
-            self.speech.speak(f"Entered {dirname}")
+            self.speech.speak(tr("msg_entered").format(name=dirname))
         else:
             path = os.path.join(self.local_path, item)
             try:
                 os.startfile(path)
-                self.speech.speak("Opening file.")
+                self.speech.speak(tr("msg_opening_file"))
             except Exception as e:
                 wx.MessageBox(str(e), "Error")
 
@@ -649,7 +652,7 @@ class SFTPPanel(wx.Panel):
                 self.sftp.chdir("..")
                 self.remote_path = self.sftp.getcwd()
                 self.refresh_remote()
-                self.speech.speak("Up directory")
+                self.speech.speak(tr("msg_up_dir"))
             except Exception as e:
                 self.play_beep("error")
                 wx.MessageBox(str(e), "Error")
@@ -659,7 +662,7 @@ class SFTPPanel(wx.Panel):
                 self.sftp.chdir(dirname)
                 self.remote_path = self.sftp.getcwd()
                 self.refresh_remote()
-                self.speech.speak(f"Entered {dirname}")
+                self.speech.speak(tr("msg_entered").format(name=dirname))
             except Exception as e:
                 self.play_beep("error")
                 wx.MessageBox(str(e), "Error")
@@ -730,7 +733,7 @@ class SFTPPanel(wx.Panel):
         if not items: return
         if len(items) > 1:
             self.speech.speak(tr("msg_cannot_rename_multi"))
-            wx.MessageBox(tr("msg_cannot_rename_multi"), "Warning")
+            wx.MessageBox(tr("msg_cannot_rename_multi"), tr("app_title"), wx.ICON_WARNING)
             return
             
         old_name = self.strip_brackets(items[0])
@@ -831,19 +834,19 @@ class SFTPPanel(wx.Panel):
         items = self.get_selected_items(self.remote_list)
         if not items: return
         if len(items) > 1:
-            self.speech.speak("Cannot rename multiple items.")
-            wx.MessageBox("Cannot rename multiple items.", "Warning")
+            self.speech.speak(tr("msg_cannot_rename_multi"))
+            wx.MessageBox(tr("msg_cannot_rename_multi"), tr("app_title"), wx.ICON_WARNING)
             return
 
         old_name = self.strip_brackets(items[0])
         
-        dlg = wx.TextEntryDialog(self, "New name:", "Rename Remote", old_name)
+        dlg = wx.TextEntryDialog(self, tr("dlg_rename_msg"), tr("dlg_rename_title"), old_name)
         if dlg.ShowModal() == wx.ID_OK:
             new_name = dlg.GetValue()
             try:
                 self.sftp.rename(self.remote_path + "/" + old_name, self.remote_path + "/" + new_name)
                 self.refresh_remote()
-                self.speech.speak("Renamed.")
+                self.speech.speak(tr("msg_renamed"))
             except Exception as e: wx.MessageBox(str(e))
 
     def do_local_delete(self, event):
@@ -873,7 +876,7 @@ class SFTPPanel(wx.Panel):
         
         self.refresh_local()
         if error_msg:
-             wx.MessageBox(f"Errors occurred:\n{error_msg}", "Delete Error")
+             wx.MessageBox(tr("err_local").format(error=error_msg), tr("app_title"))
         else:
              self.speech.speak(tr("msg_deleted_count").format(count=success_count))
 
@@ -920,12 +923,12 @@ class SFTPPanel(wx.Panel):
         
         self.refresh_remote()
         if error_msg:
-             wx.MessageBox(f"Errors occurred:\n{error_msg}", "Delete Error")
+             wx.MessageBox(tr("err_remote").format(error=error_msg), tr("app_title"))
         else:
              self.speech.speak(tr("msg_deleted_count").format(count=success_count))
 
     def do_local_mkdir(self, event):
-         dlg = wx.TextEntryDialog(self, "Folder name:", "Create Directory")
+         dlg = wx.TextEntryDialog(self, tr("dlg_rename_msg"), tr("ctx_mkdir"))
          if dlg.ShowModal() == wx.ID_OK:
              try:
                  os.mkdir(os.path.join(self.local_path, dlg.GetValue()))
@@ -933,7 +936,7 @@ class SFTPPanel(wx.Panel):
              except Exception as e: wx.MessageBox(str(e))
 
     def do_remote_mkdir(self, event):
-         dlg = wx.TextEntryDialog(self, "Folder name:", "Create Remote Directory")
+         dlg = wx.TextEntryDialog(self, tr("dlg_rename_msg"), tr("ctx_mkdir"))
          if dlg.ShowModal() == wx.ID_OK:
              try:
                  self.sftp.mkdir(self.remote_path + "/" + dlg.GetValue())
@@ -952,6 +955,8 @@ class SFTPPanel(wx.Panel):
 
     def on_disconnect(self, event):
         self.save_session_paths()
+        if self.transfer_dlg:
+            self.transfer_dlg.on_cancel(None)
         if self.ssh_client: self.ssh_client.disconnect()
         self.GetParent().show_welcome_screen()
 
@@ -989,7 +994,7 @@ class SFTPPanel(wx.Panel):
         event = threading.Event()
         
         def show():
-            dlg = wx.TextEntryDialog(self, f"Rename {filename} to:", "Rename Conflict", f"copy_{filename}")
+            dlg = wx.TextEntryDialog(self, tr("msg_conflict_exist").format(filename=filename), tr("dlg_conflict_title"), f"copy_{filename}")
             if dlg.ShowModal() == wx.ID_OK:
                 result_container['name'] = dlg.GetValue()
             else:
