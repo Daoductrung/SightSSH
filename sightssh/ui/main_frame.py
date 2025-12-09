@@ -107,9 +107,36 @@ class MainFrame(wx.Frame):
         self.Raise()
         self.SetFocus()
 
-    def _init_ui(self):
-        """Initialize the Start Screen."""
-        self.show_welcome_screen()
+            self.show_welcome_screen()
+
+    def check_updates(self, silent=False):
+        """
+        Runs update check in background.
+        silent: If True, only show dialog if update found. If False, show 'Up to date' msg.
+        """
+        if not silent:
+            from sightssh.accessibility.speech import SpeechManager
+            SpeechManager().speak(tr("msg_checking_updates"))
+            
+        def _check():
+            from sightssh.core.update_checker import UpdateChecker
+            from sightssh import __version__
+            
+            has_update, new_ver, changelog = UpdateChecker.check_update(__version__)
+            
+            def _ui_result():
+                if has_update:
+                    from sightssh.ui.update_dialog import UpdateDialog
+                    dlg = UpdateDialog(self, __version__, new_ver, changelog)
+                    dlg.ShowModal()
+                    dlg.Destroy()
+                elif not silent:
+                     wx.MessageBox(tr("msg_up_to_date"), tr("app_title"), wx.ICON_INFORMATION)
+                     
+            wx.CallAfter(_ui_result)
+            
+        import threading
+        threading.Thread(target=_check, daemon=True).start()
 
     def show_welcome_screen(self):
         if self.panel:
@@ -129,10 +156,11 @@ class MainFrame(wx.Frame):
         btn_shortcuts = wx.Button(self.panel, label=tr("btn_shortcuts"))
         btn_about = wx.Button(self.panel, label=tr("btn_about"))
         btn_settings = wx.Button(self.panel, label=f"{tr('menu_settings')} (Alt+S)")
+        btn_check_update = wx.Button(self.panel, label=tr("btn_check_updates"))
         btn_exit = wx.Button(self.panel, label=tr("btn_exit_app"))
 
         # Add to sizer
-        for btn in [btn_view_profiles, btn_create_profile, btn_shortcuts, btn_about, btn_settings, btn_exit]:
+        for btn in [btn_view_profiles, btn_create_profile, btn_shortcuts, btn_about, btn_settings, btn_check_update, btn_exit]:
             self.sizer.Add(btn, 0, wx.ALL | wx.EXPAND, 10)
 
         # Bindings
@@ -141,11 +169,10 @@ class MainFrame(wx.Frame):
         btn_settings.Bind(wx.EVT_BUTTON, self.on_settings)
         btn_shortcuts.Bind(wx.EVT_BUTTON, self.on_help)
         btn_about.Bind(wx.EVT_BUTTON, self.on_about)
+        btn_check_update.Bind(wx.EVT_BUTTON, lambda e: self.check_updates(silent=False))
         btn_exit.Bind(wx.EVT_BUTTON, self.on_exit)
 
         # Accelerators (Hotkeys)
-        # Note: Accelerators are usually frame-global, might need management if panels change.
-        # Ideally we clear old ones.
         accel_tbl = wx.AcceleratorTable([
             (wx.ACCEL_ALT, ord('V'), btn_view_profiles.GetId()),
             (wx.ACCEL_ALT, ord('C'), btn_create_profile.GetId()),
@@ -157,71 +184,23 @@ class MainFrame(wx.Frame):
         
         btn_view_profiles.SetFocus()
         self.panel.Layout()
+        
+        # Audio
         self.speech.speak(tr("msg_welcome_speech"))
 
-    def on_view_profiles(self, event):
-        from sightssh.ui.profile_list import ProfileListPanel
-        self.switch_to_panel(ProfileListPanel)
-
-    def on_create_profile(self, event):
-        from sightssh.ui.profile_editor import ProfileEditorPanel
-        self.switch_to_panel(ProfileEditorPanel)
-
-    def on_exit(self, event):
-        # Clean up settings dialog
-        dlg = getattr(self, 'settings_dlg', None)
-        if dlg:
-            dlg.Destroy()
-            
-        # Attempt graceful close
-        self.Close()
+        # Access config to check for startup updates
+        # Only check once per app run ideally, or just check every time we hit welcome?
+        # Let's check once on app launch.
+        # But wait, show_welcome_screen is called on disconnect too.
+        # Use a flag on self or check inside _init_ui
         
-        # Force kill after short delay if threads hang
-        import os
-        os._exit(0)
-
-    def switch_to_panel(self, panel_class, **kwargs):
-        """Switches the content of the main frame to a new panel."""
-        self.panel.DestroyChildren()
-        self.panel.SetSizer(None)
+    def _init_ui(self):
+        """Initialize the Start Screen."""
+        self.show_welcome_screen()
         
-        self.panel.Hide()
-        self.panel.Destroy()
-        
-        self.panel = panel_class(self, **kwargs)
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        # We rely on the panel setting its own sizer or just filling the frame.
-        # Because we destroyed the old self.panel, and assigned a new one, 
-        # we need to make sure the FRAME sizer (if any) knows about it, or the frame itself manages size.
-        # Actually MainFrame is a Frame. We should probably use SetSizer on the FRAME containing the panel?
-        # Or just rely on default Frame behavior (one child = fill).
-        
-        self.panel.Show()
-        self.Layout()
-        self.panel.SetFocus()
-
-    def start_session(self, connection_details):
-        # Start a fresh session
-        if hasattr(self, 'active_client') and self.active_client:
-            self.active_client.disconnect()
-        self.active_client = None # Will be set by TerminalPanel on connect
-        
-        from sightssh.ui.terminal import TerminalPanel
-        self.switch_to_panel(TerminalPanel, connection_details=connection_details)
-
-    def switch_to_sftp(self, client, details):
-        from sightssh.ui.sftp import SFTPPanel
-        self.switch_to_panel(SFTPPanel, ssh_client=client, connection_details=details)
-
-    def switch_to_terminal(self, client, details):
-        from sightssh.ui.terminal import TerminalPanel
-        self.switch_to_panel(TerminalPanel, connection_details=details, existing_client=client)
-
-    def on_connection_error(self, connection_details):
-        profile_name = connection_details.get('name')
-        if profile_name:
-             from sightssh.ui.profile_editor import ProfileEditorPanel
-             self.switch_to_panel(ProfileEditorPanel, profile_name=profile_name, existing_data=connection_details, profile_password=None) 
-        else:
-             wx.MessageBox("Unknown profile error.", "Error")
-             self.show_welcome_screen()
+        # Startup Check
+        from sightssh.core.config_manager import ConfigManager
+        cfg = ConfigManager().get_settings()
+        if cfg.get("check_updates_on_startup", True):
+             # Debounce slightly to let UI settle
+             wx.CallLater(1000, lambda: self.check_updates(silent=True))

@@ -148,6 +148,16 @@ class SettingsDialog(wx.Dialog):
         self.chk_ascii.SetToolTip(tr("desc_ascii_filter"))
         sizer.Add(self.chk_ascii, 0, wx.EXPAND | wx.ALL, 10)
         
+        self.chk_ascii.SetToolTip(tr("desc_ascii_filter"))
+        sizer.Add(self.chk_ascii, 0, wx.EXPAND | wx.ALL, 10)
+        
+        # Check Updates
+        label_text = f"{tr('lbl_check_updates')}. {tr('desc_check_updates')}"
+        self.chk_updates = wx.CheckBox(panel, label=label_text, name=label_text)
+        self.chk_updates.SetValue(self.settings.get("check_updates_on_startup", True))
+        self.chk_updates.SetToolTip(tr("desc_check_updates"))
+        sizer.Add(self.chk_updates, 0, wx.EXPAND | wx.ALL, 10)
+
         panel.SetSizer(sizer)
 
     def setup_terminal_tab(self):
@@ -343,6 +353,7 @@ class SettingsDialog(wx.Dialog):
             new_settings["confirm_delete"] = self.chk_confirm.GetValue()
             new_settings["restore_last_path"] = self.chk_restore_path.GetValue()
             new_settings["ascii_filter"] = self.chk_ascii.GetValue()
+            new_settings["check_updates_on_startup"] = self.chk_updates.GetValue()
             
             # Terminal
             ka_val = self.spin_keep_alive.GetValue() if self.chk_keep_alive.GetValue() else 0
