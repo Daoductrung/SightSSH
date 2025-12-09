@@ -1,6 +1,6 @@
 import wx
 from sightssh.core.config_manager import ConfigManager
-from sightssh.ui.dialogs import PasswordDialog
+
 from sightssh.accessibility.speech import SpeechManager
 from sightssh.core.i18n import tr
 
@@ -80,9 +80,9 @@ class ProfileListPanel(wx.Panel):
             self.speech.speak(tr("msg_profile_unlocked"))
             return default_key
 
-        dlg = PasswordDialog(self, title=tr("title_unlock").format(name=profile_name), message=tr("msg_enter_pass_for").format(name=profile_name))
+        dlg = wx.PasswordEntryDialog(self, message=tr("msg_enter_pass_for").format(name=profile_name), caption=tr("title_unlock").format(name=profile_name), value="")
         if dlg.ShowModal() == wx.ID_OK:
-            pwd = dlg.get_password()
+            pwd = dlg.GetValue()
             dlg.Destroy()
             
             if self.config.verify_profile_password(profile_name, pwd):

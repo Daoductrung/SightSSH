@@ -980,6 +980,17 @@ class SFTPPanel(wx.Panel):
         self.refresh_lists()
         self.speech.speak(tr("msg_lists_refreshed"))
 
+    def can_close(self):
+        # Check if transfer dialog is active/visible
+        if self.transfer_dlg and self.transfer_dlg.IsShown():
+            res = wx.MessageBox(
+                tr("msg_confirm_exit_transfer"), 
+                tr("title_confirm_exit"), 
+                wx.YES_NO | wx.ICON_WARNING
+            )
+            return res == wx.YES
+        return True
+
     def resolve_conflict(self, filename):
         """
         Shows ConflictDialog on main thread and waits for result.

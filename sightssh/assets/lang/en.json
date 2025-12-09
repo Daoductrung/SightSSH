@@ -217,5 +217,7 @@
     "err_multi_errors": "Errors:\n{errors}",
     "title_update": "SightSSH Update",
     "lbl_version": "Version: {version}",
-    "err_invalid_prof_pass": "Invalid Profile Password"
+    "err_invalid_prof_pass": "Invalid Profile Password",
+    "msg_confirm_exit_transfer": "A file transfer is in progress. Are you sure you want to exit?",
+    "title_confirm_exit": "Confirm Exit"
 }

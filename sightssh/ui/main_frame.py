@@ -37,6 +37,7 @@ class MainFrame(wx.Frame):
         self.Centre()
         
         self.Bind(wx.EVT_ACTIVATE, self.on_activate)
+        self.Bind(wx.EVT_CLOSE, self.on_close_window)
         
         # Announce title on start
         wx.CallAfter(self.speech.speak, tr("msg_welcome_speech"))
@@ -220,6 +221,16 @@ class MainFrame(wx.Frame):
             except: pass
 
     def on_exit(self, event):
+        self.Close()
+
+    def on_close_window(self, event):
+        # Check safety first
+        if self.panel and hasattr(self.panel, 'can_close'):
+            if not self.panel.can_close():
+                if event.CanVeto():
+                    event.Veto()
+                    return
+
         self._cleanup_current_panel()
         
         # Clean up settings dialog
@@ -227,10 +238,9 @@ class MainFrame(wx.Frame):
         if dlg:
             dlg.Destroy()
             
-        # Attempt graceful close
-        self.Close()
+        event.Skip() # Allow close
         
-        # Force kill after short delay if threads hang
+        # Force kill after short delay
         import os
         wx.CallLater(500, lambda: os._exit(0))
 

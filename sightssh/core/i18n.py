@@ -1,6 +1,7 @@
 import json
 import os
 import locale
+import logging
 
 class TranslationManager:
     _instance = None

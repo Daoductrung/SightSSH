@@ -217,5 +217,7 @@
     "err_multi_errors": "Các lỗi:\n{errors}",
     "title_update": "Cập nhật SightSSH",
     "lbl_version": "Phiên bản: {version}",
-    "err_invalid_prof_pass": "Mật khẩu hồ sơ không hợp lệ"
+    "err_invalid_prof_pass": "Mật khẩu hồ sơ không hợp lệ",
+    "msg_confirm_exit_transfer": "Đang có quá trình chuyển tệp. Bạn có chắc chắn muốn thoát?",
+    "title_confirm_exit": "Xác nhận thoát"
 }
