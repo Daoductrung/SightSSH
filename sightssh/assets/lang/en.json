@@ -221,5 +221,6 @@
     "msg_confirm_exit_transfer": "A file transfer is in progress. Are you sure you want to exit?",
     "title_confirm_exit": "Confirm Exit",
     "prefix_copy": "copy_",
-    "title_critical_error": "Critical Error"
+    "title_critical_error": "Critical Error",
+    "err_settings_open": "Error opening settings: {error}"
 }

@@ -26,7 +26,8 @@ class HelpDialog(wx.Dialog):
             ("Delete", tr("hlp_delete")),
             ("F5", tr("hlp_refresh")),
             ("Backspace", tr("hlp_back_dir")),
-            ("Shift + Enter", tr("hlp_multiline"))
+            ("Shift + Enter", tr("hlp_multiline")),
+            ("Alt + H", tr("btn_shortcuts"))
         ]
         
         for i, (key, desc) in enumerate(shortcuts):

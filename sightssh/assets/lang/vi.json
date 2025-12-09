@@ -221,5 +221,6 @@
     "msg_confirm_exit_transfer": "Đang có quá trình chuyển tệp. Bạn có chắc chắn muốn thoát?",
     "title_confirm_exit": "Xác nhận thoát",
     "prefix_copy": "ban_sao_",
-    "title_critical_error": "Lỗi Nghiêm Trọng"
+    "title_critical_error": "Lỗi Nghiêm Trọng",
+    "err_settings_open": "Lỗi mở cài đặt: {error}"
 }

@@ -19,7 +19,7 @@ class MainFrame(wx.Frame):
         
         # Settings
         settings_menu = wx.Menu()
-        settings_item = settings_menu.Append(wx.ID_PREFERENCES, tr("menu_settings"), tr("hlp_configure"))
+        settings_item = settings_menu.Append(wx.ID_PREFERENCES, tr("menu_settings") + "\tAlt+S", tr("hlp_configure"))
         menu_bar.Append(settings_menu, tr("menu_settings"))
         
         # Help
@@ -90,7 +90,7 @@ class MainFrame(wx.Frame):
         except Exception as e:
             import logging
             logging.error(f"Error opening settings: {e}", exc_info=True)
-            wx.MessageBox(f"Error opening settings: {e}", "Error")
+            wx.MessageBox(tr("err_settings_open").format(error=e), tr("err_title"), wx.ICON_ERROR)
 
     def on_help(self, event):
         from sightssh.ui.help_dialog import HelpDialog
@@ -282,5 +282,5 @@ class MainFrame(wx.Frame):
              from sightssh.ui.profile_editor import ProfileEditorPanel
              self.switch_to_panel(ProfileEditorPanel, profile_name=profile_name, existing_data=connection_details, profile_password=None) 
         else:
-             wx.MessageBox(tr("err_unknown_profile"), "Error")
+             wx.MessageBox(tr("err_unknown_profile"), tr("err_title"), wx.ICON_ERROR)
              self.show_welcome_screen()

@@ -954,7 +954,7 @@ class SFTPPanel(wx.Panel):
              try:
                  self.sftp.mkdir(self.remote_path + "/" + dlg.GetValue())
                  self.refresh_remote()
-             except Exception as e: wx.MessageBox(str(e))
+             except Exception as e: wx.MessageBox(str(e), tr("err_title"), wx.ICON_ERROR)
 
     def save_session_paths(self):
         if self.settings.get("restore_last_path", True):

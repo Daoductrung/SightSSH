@@ -114,7 +114,7 @@ class ProfileListPanel(wx.Panel):
                 if hasattr(self.GetParent(), 'start_session'):
                     self.GetParent().start_session(details)
                 else:
-                    wx.MessageBox(tr("msg_not_implemented"), "Info")
+                    wx.MessageBox(tr("msg_not_implemented"), tr("app_title"), wx.ICON_INFORMATION)
 
             except Exception as e:
                  wx.MessageBox(tr("err_load_profile").format(error=e), tr("err_title"))
