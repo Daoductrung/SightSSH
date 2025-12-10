@@ -36,7 +36,9 @@ class ConfigManager:
             "output_type": "listbox",
             "notification_mode": "both",
             "verbosity": ["size", "type", "permissions", "owner", "group"],
-            "check_updates_on_startup": True
+            "check_updates_on_startup": True,
+            "timeout": 10,
+            "confirm_disconnect": False
         }
         
         current = self.get_settings()

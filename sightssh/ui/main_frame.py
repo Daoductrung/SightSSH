@@ -63,7 +63,7 @@ class MainFrame(wx.Frame):
     def on_settings(self, event):
         try:
             from sightssh.ui.settings_dialog import SettingsDialog
-            from sightssh.core.i18n import tr
+            # from sightssh.core.i18n import tr  <-- Redundant, already imported at top
             
             # Singleton Pattern: Create once, reuse forever.
             # This avoids crash-on-destroy issues with wxPython/Windows Accessibility.

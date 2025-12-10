@@ -218,8 +218,9 @@
     "title_update": "Cập nhật SightSSH",
     "lbl_version": "Phiên bản: {version}",
     "err_invalid_prof_pass": "Mật khẩu hồ sơ không hợp lệ",
-    "msg_confirm_exit_transfer": "Đang có quá trình chuyển tệp. Bạn có chắc chắn muốn thoát?",
-    "title_confirm_exit": "Xác nhận thoát",
+    "msg_confirm_exit_transfer": "Đang chuyển tệp. Bạn có chắc chắn muốn đóng ứng dụng không?",
+    "msg_confirm_disconnect": "Bạn có chắc chắn muốn ngắt kết nối không?",
+    "title_confirm_exit": "Xác nhận Thoát",
     "prefix_copy": "ban_sao_",
     "title_critical_error": "Lỗi Nghiêm Trọng",
     "err_settings_open": "Lỗi mở cài đặt: {error}"

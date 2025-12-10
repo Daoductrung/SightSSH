@@ -3,7 +3,7 @@ import os
 import threading
 import stat
 import shutil
-import shutil
+
 from sightssh.accessibility.speech import SpeechManager
 from sightssh.core.i18n import tr
 from sightssh.ui.transfer_dialog import TransferProgressDialog
@@ -183,7 +183,7 @@ class SFTPPanel(wx.Panel):
             ("size", "lbl_size", 1), 
             ("type", "lbl_type", 2), 
             ("modified", "lbl_modified", 3),
-            ("permissions", "lbl_permissions", 100),
+            ("permissions", "val_permissions", 100),
             ("owner", "lbl_owner", 5),
             ("group", "lbl_group", 6)
         ]
@@ -773,7 +773,7 @@ class SFTPPanel(wx.Panel):
         menu.Append(self.ID_R_RENAME, tr("ctx_rename"))
         menu.Append(self.ID_R_MKDIR, tr("ctx_mkdir"))
         menu.AppendSeparator()
-        menu.Append(self.ID_PERMS, tr("lbl_permissions"))
+        menu.Append(self.ID_PERMS, tr("val_permissions"))
         
         self.PopupMenu(menu)
 
@@ -970,6 +970,10 @@ class SFTPPanel(wx.Panel):
          self.GetParent().switch_to_terminal(self.ssh_client, self.details)
 
     def on_disconnect(self, event):
+        if self.settings.get("confirm_disconnect", False):
+            if wx.MessageBox(tr("msg_confirm_disconnect"), tr("app_title"), wx.YES_NO | wx.ICON_QUESTION) != wx.YES:
+                return
+                
         self.save_session_paths()
         if self.transfer_dlg:
             self.transfer_dlg.on_cancel(None)

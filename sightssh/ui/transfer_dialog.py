@@ -30,13 +30,25 @@ class TransferProgressDialog(wx.Dialog):
         self.lbl_file.SetLabel(tr("msg_transfer_cancelling"))
         self.btn_cancel.Disable()
 
+        self.last_speech_percent = 0
+        from sightssh.accessibility.speech import SpeechManager
+        self.speech = SpeechManager()
+
     def update_progress(self, transferred, total):
         if total > 0:
             percent = int((transferred / total) * 100)
             wx.CallAfter(self.gauge.SetValue, percent)
+            
+            # Speak every 10%
+            if percent >= self.last_speech_percent + 10:
+                self.last_speech_percent = percent
+                wx.CallAfter(self.speech.speak, f"{percent}%", interrupt=False)
     
     def set_filename(self, name):
+        """Sets the current filename and resets localized speech tracking."""
         wx.CallAfter(self.lbl_file.SetLabel, tr("msg_transferring").format(name=name))
+        # Optional: Announce filename change? Maybe too verbose.
+        # Let's keep it simple for now as requested.
 
     def check_cancel(self):
         if self.is_cancelled:

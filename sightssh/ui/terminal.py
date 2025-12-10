@@ -349,9 +349,6 @@ class TerminalPanel(wx.Panel):
         # Send everything we catch here.
         # This includes Enter (13), Backspace (8), and regular chars.
         # We do NOT call event.Skip() to prevent local text ctrl update.
-        # Send everything we catch here.
-        # This includes Enter (13), Backspace (8), and regular chars.
-        # We do NOT call event.Skip() to prevent local text ctrl update.
         # ALLOW UNICODE: key can be > 255 (e.g. Vietnamese)
         try:
             self.client.send(chr(key).encode('utf-8'))
@@ -520,6 +517,11 @@ class TerminalPanel(wx.Panel):
             self.speech.speak(tr("msg_copied_all"))
 
     def on_disconnect_click(self, event):
+        # Helper to check setting
+        if self.settings.get("confirm_disconnect", False):
+            if wx.MessageBox(tr("msg_confirm_disconnect"), tr("app_title"), wx.YES_NO | wx.ICON_QUESTION) != wx.YES:
+                return
+
         if self.log_file:
             try:
                 self.log_file.write("\n--- Session Disconnected ---\n")
