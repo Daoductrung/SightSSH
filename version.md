@@ -1,4 +1,6 @@
-v0.4.0
+v1.0.0
 
-* Confirm the update checking feature works.
-* The second line of what's new in version.md.
+Added 'confirm\_disconnect' setting and confirmation dialogs for disconnect actions in SFTP and Terminal panels.
+
+Updated language files for new messages, improved resource cleanup in SSH client disconnect, and enhanced transfer dialog with speech feedback for progress.
+
