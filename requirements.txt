@@ -1,7 +1,7 @@
+accessible_output2>=0.13
 wxPython>=4.2.1
 cryptography>=41.0.0
 paramiko>=3.3.1
 platformdirs>=3.10.0
 pyinstaller>=6.0.0
 packaging>=23.1
-accessible_output2>=0.13
