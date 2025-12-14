@@ -3,6 +3,9 @@ import os
 import threading
 import stat
 import shutil
+import math
+import datetime
+import time
 
 from sightssh.accessibility.speech import SpeechManager
 from sightssh.core.i18n import tr
@@ -186,7 +189,7 @@ class SFTPPanel(wx.Panel):
             ("size", "lbl_size", 1), 
             ("type", "lbl_type", 2), 
             ("modified", "lbl_modified", 3),
-            ("permissions", "val_permissions", 100),
+            ("permissions", "val_permissions", 4),
             ("owner", "lbl_owner", 5),
             ("group", "lbl_group", 6)
         ]

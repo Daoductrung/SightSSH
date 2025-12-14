@@ -62,6 +62,7 @@ class SettingsDialog(wx.Dialog):
         self.cmb_language.SetSelection(1 if current_lang == "vi" else 0)
         self.chk_hidden.SetValue(self.settings.get("show_hidden", True))
         self.chk_confirm.SetValue(self.settings.get("confirm_delete", False))
+        self.chk_confirm_disconnect.SetValue(self.settings.get("confirm_disconnect", False))
         self.chk_restore_path.SetValue(self.settings.get("restore_last_path", True))
         self.chk_ascii.SetValue(self.settings.get("ascii_filter", True))
         
@@ -135,8 +136,16 @@ class SettingsDialog(wx.Dialog):
         label_text = f"{tr('lbl_confirm_delete')}. {tr('desc_confirm_delete')}"
         self.chk_confirm = wx.CheckBox(panel, label=label_text, name=label_text)
         self.chk_confirm.SetValue(self.settings.get("confirm_delete", False))
+        self.chk_confirm.SetValue(self.settings.get("confirm_delete", False))
         self.chk_confirm.SetToolTip(tr("desc_confirm_delete"))
         sizer.Add(self.chk_confirm, 0, wx.EXPAND | wx.ALL, 10)
+
+        # Confirm Disconnect
+        label_text = f"{tr('lbl_confirm_disconnect')}. {tr('desc_confirm_disconnect')}"
+        self.chk_confirm_disconnect = wx.CheckBox(panel, label=label_text, name=label_text)
+        self.chk_confirm_disconnect.SetValue(self.settings.get("confirm_disconnect", False))
+        self.chk_confirm_disconnect.SetToolTip(tr("desc_confirm_disconnect"))
+        sizer.Add(self.chk_confirm_disconnect, 0, wx.EXPAND | wx.ALL, 10)
 
         # Restore Last Path
         label_text = f"{tr('lbl_restore_path')}. {tr('desc_restore_path')}"
@@ -372,6 +381,7 @@ class SettingsDialog(wx.Dialog):
             new_settings["language"] = "vi" if self.cmb_language.GetSelection() == 1 else "en"
             new_settings["show_hidden"] = self.chk_hidden.GetValue()
             new_settings["confirm_delete"] = self.chk_confirm.GetValue()
+            new_settings["confirm_disconnect"] = self.chk_confirm_disconnect.GetValue()
             new_settings["restore_last_path"] = self.chk_restore_path.GetValue()
             new_settings["ascii_filter"] = self.chk_ascii.GetValue()
             new_settings["check_updates_on_startup"] = self.chk_updates.GetValue()

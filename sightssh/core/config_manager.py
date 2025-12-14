@@ -35,7 +35,7 @@ class ConfigManager:
             "interaction_mode": "dedicated", 
             "output_type": "listbox",
             "notification_mode": "both",
-            "verbosity": ["size", "type", "permissions", "owner", "group"],
+            "verbosity": ["size", "type", "modified", "permissions", "owner", "group"],
             "check_updates_on_startup": True,
             "timeout": 10,
             "confirm_disconnect": False

@@ -188,26 +188,33 @@ class TerminalPanel(wx.Panel):
             wx.CallAfter(_restore_cmd)
 
     def do_connect(self):
-        try:
-            ka = self.settings.get("keep_alive", 30)
-            timeout = self.settings.get("connection_timeout", 10)
-            self.client.connect(
-                host=self.details['host'],
-                port=self.details['port'],
-                username=self.details['username'],
-                password=self.details.get('secret') if self.details['auth_type'] == 'password' else None,
-                key_filename=self.details.get('key_path') if self.details['auth_type'] == 'key' else None,
-                passphrase=self.details.get('secret') if self.details['auth_type'] == 'key' else None,
-                keep_alive=ka,
-                timeout=timeout
-            )
-            # Register active client with parent
-            if hasattr(self.GetParent(), 'active_client'):
-                self.GetParent().active_client = self.client
+        def _connect_worker():
+            try:
+                ka = self.settings.get("keep_alive", 30)
+                timeout = self.settings.get("connection_timeout", 10)
+                self.client.connect(
+                    host=self.details['host'],
+                    port=self.details['port'],
+                    username=self.details['username'],
+                    password=self.details.get('secret') if self.details['auth_type'] == 'password' else None,
+                    key_filename=self.details.get('key_path') if self.details['auth_type'] == 'key' else None,
+                    passphrase=self.details.get('secret') if self.details['auth_type'] == 'key' else None,
+                    keep_alive=ka,
+                    timeout=timeout
+                )
                 
-            wx.CallAfter(self.on_connected)
-        except Exception as e:
-            wx.CallAfter(self.on_connect_fail, str(e))
+                # Register active client with parent (thread-safe assignment usually ok)
+                def _register():
+                    if hasattr(self.GetParent(), 'active_client'):
+                        self.GetParent().active_client = self.client
+                wx.CallAfter(_register)
+                    
+                wx.CallAfter(self.on_connected)
+            except Exception as e:
+                wx.CallAfter(self.on_connect_fail, str(e))
+                
+        # Start connection in background thread
+        threading.Thread(target=_connect_worker, daemon=True).start()
 
     def on_connected(self):
         self.status.SetLabel(tr("msg_connected"))

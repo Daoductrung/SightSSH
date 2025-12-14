@@ -245,18 +245,26 @@ class MainFrame(wx.Frame):
                     event.Veto()
                     return
 
+        # Hide immediately for "instant close" feel
+        self.Hide()
+        
+        self._cancel_pending_focus()
         self._cleanup_current_panel()
         
-        # Clean up settings dialog
-        dlg = getattr(self, 'settings_dlg', None)
-        if dlg:
-            dlg.Destroy()
+        def _shutdown():
+            # Disconnect in background thread to allow UI to close
+            if hasattr(self, 'active_client') and self.active_client:
+                try: self.active_client.disconnect()
+                except: pass
             
-        event.Skip() # Allow close
-        
-        # Force kill after short delay
-        import os
-        wx.CallLater(500, lambda: os._exit(0))
+            # Wait a bit for threads to settle then hard exit
+            import time
+            time.sleep(0.2) 
+            import os
+            os._exit(0)
+
+        import threading
+        threading.Thread(target=_shutdown, daemon=True).start()
 
     def switch_to_panel(self, panel_class, **kwargs):
         """Switches the content of the main frame to a new panel."""
