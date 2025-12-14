@@ -190,6 +190,7 @@ class TerminalPanel(wx.Panel):
     def do_connect(self):
         try:
             ka = self.settings.get("keep_alive", 30)
+            timeout = self.settings.get("connection_timeout", 10)
             self.client.connect(
                 host=self.details['host'],
                 port=self.details['port'],
@@ -197,7 +198,8 @@ class TerminalPanel(wx.Panel):
                 password=self.details.get('secret') if self.details['auth_type'] == 'password' else None,
                 key_filename=self.details.get('key_path') if self.details['auth_type'] == 'key' else None,
                 passphrase=self.details.get('secret') if self.details['auth_type'] == 'key' else None,
-                keep_alive=ka
+                keep_alive=ka,
+                timeout=timeout
             )
             # Register active client with parent
             if hasattr(self.GetParent(), 'active_client'):

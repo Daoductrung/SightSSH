@@ -1,6 +1,3 @@
-v1.0.0
+v1.0.1
 
-Added 'confirm\_disconnect' setting and confirmation dialogs for disconnect actions in SFTP and Terminal panels.
-
-Updated language files for new messages, improved resource cleanup in SSH client disconnect, and enhanced transfer dialog with speech feedback for progress.
-
+Fixed critical crash when connecting to SSH and fixed 'RuntimeError' when disconnecting from SFTP. Added 'Connection Timeout' setting in Terminal preferences. Improved application stability and resource cleanup.

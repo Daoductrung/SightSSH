@@ -146,11 +146,14 @@ class SFTPPanel(wx.Panel):
             self.on_back_term(None)
 
     def refresh_lists(self):
-        # Reload settings on refresh to catch any changes
-        self.settings = self.config.get_settings()
-        self.update_columns() # Update column visibility
-        self.refresh_local()
-        self.refresh_remote()
+        try:
+             if not self: return
+             # Reload settings on refresh to catch any changes
+             self.settings = self.config.get_settings()
+             self.update_columns() # Update column visibility
+             self.refresh_local()
+             self.refresh_remote()
+        except RuntimeError: pass
         
     def update_columns(self):
         """Rebuilds ListCtrl columns based on verbosity settings."""
@@ -230,6 +233,7 @@ class SFTPPanel(wx.Panel):
 
     def refresh_local(self):
         try:
+            if not self: return
             show_hidden = self.settings.get("show_hidden", True)
             items = os.listdir(self.local_path)
             
@@ -264,10 +268,12 @@ class SFTPPanel(wx.Panel):
             
             self._populate_list(self.local_list, data_list + dirs + files, self.local_indices)
         except Exception as e:
+            if isinstance(e, RuntimeError): return
             self.speech.speak(tr("err_local").format(error=e))
 
     def refresh_remote(self):
         try:
+            if not self: return
             if not self.sftp: return
             show_hidden = self.settings.get("show_hidden", True)
             attrs = self.sftp.listdir_attr(self.remote_path)
@@ -277,6 +283,7 @@ class SFTPPanel(wx.Panel):
             
             dirs = []
             files = []
+
             
             for attr in attrs:
                 name = attr.filename
@@ -312,6 +319,7 @@ class SFTPPanel(wx.Panel):
             
             self._populate_list(self.remote_list, data_list + dirs + files, self.remote_indices)
         except Exception as e:
+            if isinstance(e, RuntimeError): return
             self.speech.speak(tr("err_remote").format(error=e))
 
     def play_beep(self, pitch="start"):
@@ -978,7 +986,9 @@ class SFTPPanel(wx.Panel):
         if self.transfer_dlg:
             self.transfer_dlg.on_cancel(None)
         if self.ssh_client: self.ssh_client.disconnect()
-        self.GetParent().show_welcome_screen()
+        
+        # Defer UI destruction to allow event handler to complete
+        wx.CallAfter(self.GetParent().show_welcome_screen)
 
     def on_refresh(self, event):
         self.refresh_lists()
@@ -1036,3 +1046,15 @@ class SFTPPanel(wx.Panel):
         wx.CallAfter(show)
         event.wait()
         return result_container.get('name')
+
+    def cleanup(self):
+        """Cleanup resources before destruction."""
+        try:
+            if self.transfer_dlg:
+                self.transfer_dlg.on_cancel(None)
+        except: pass
+        
+        try:
+            if self.sftp:
+                self.sftp.close()
+        except: pass

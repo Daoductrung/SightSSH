@@ -15,7 +15,7 @@ class SightSSHClient:
         self.on_error_callback = None
         self.on_disconnected_callback = None
 
-    def connect(self, host, port, username, password=None, key_filename=None, passphrase=None, keep_alive=30):
+    def connect(self, host, port, username, password=None, key_filename=None, passphrase=None, keep_alive=30, timeout=10):
         """
         Connects to the SSH server.
         Raises paramiko exceptions on failure.
@@ -29,13 +29,7 @@ class SightSSHClient:
                 password=password,
                 key_filename=key_filename,
                 passphrase=passphrase,
-                passphrase=passphrase,
-                timeout=int(keep_alive) if keep_alive > 10 else 10, # Wait, keep_alive is not timeout!
-                # I need to change the method signature of connect to accept timeout
-                # But wait, looking at file content again...
-                # current arg is keep_alive.
-                # I should add `timeout=10` to arguments or use kwargs.
-                # Let's check view_file of ssh_client.py again to be sure of signature.
+                timeout=timeout,
                 allow_agent=False, # cleaner for now, explicit control
                 look_for_keys=False
             )

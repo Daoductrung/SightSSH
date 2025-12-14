@@ -68,6 +68,7 @@ class SettingsDialog(wx.Dialog):
         # Terminal
         self.chk_keep_alive.SetValue(self.settings.get("keep_alive", 30) > 0)
         self.spin_keep_alive.SetValue(self.settings.get("keep_alive", 30))
+        self.spin_timeout.SetValue(self.settings.get("connection_timeout", 10))
         self.chk_logging.SetValue(self.settings.get("logging_enabled", False))
         
         modes = ["dedicated", "standard"]
@@ -205,6 +206,24 @@ class SettingsDialog(wx.Dialog):
         ka_sizer.Add(self.spin_keep_alive, 0, wx.ALIGN_CENTER_VERTICAL)
         
         sizer.Add(ka_sizer, 0, wx.EXPAND | wx.ALL, 10)
+        
+        # Timeout
+        tm_text = tr("lbl_timeout")
+        tm_desc = tr("desc_timeout")
+        full_tm = f"{tm_text}. {tm_desc}"
+        
+        tm_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+        lbl_tm = wx.StaticText(panel, label=tm_text)
+        lbl_tm.SetToolTip(tm_desc)
+        
+        self.spin_timeout = wx.SpinCtrl(panel, min=5, max=120, initial=self.settings.get("connection_timeout", 10), name=full_tm)
+        self.spin_timeout.SetToolTip(tm_desc)
+        
+        tm_sizer.Add(lbl_tm, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
+        tm_sizer.Add(self.spin_timeout, 0, wx.ALIGN_CENTER_VERTICAL)
+        
+        sizer.Add(tm_sizer, 0, wx.EXPAND | wx.ALL, 10)
         
 
         # Logging
@@ -360,6 +379,7 @@ class SettingsDialog(wx.Dialog):
             # Terminal
             ka_val = self.spin_keep_alive.GetValue() if self.chk_keep_alive.GetValue() else 0
             new_settings["keep_alive"] = ka_val
+            new_settings["connection_timeout"] = self.spin_timeout.GetValue()
             new_settings["logging_enabled"] = self.chk_logging.GetValue()
             new_settings["interaction_mode"] = "standard" if self.cmb_mode.GetSelection() == 1 else "dedicated"
             new_settings["output_type"] = "textbox" if self.cmb_output.GetSelection() == 1 else "listbox"

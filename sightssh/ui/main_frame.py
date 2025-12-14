@@ -42,6 +42,10 @@ class MainFrame(wx.Frame):
         # Announce title on start
         wx.CallAfter(self.speech.speak, tr("msg_welcome_speech"))
 
+    def _cancel_pending_focus(self):
+        if hasattr(self, '_activation_timer') and self._activation_timer.IsRunning():
+            self._activation_timer.Stop()
+
     def on_activate(self, event):
         if event.GetActive() and self.panel:
              # Fix for Alt-Tab freezing: Force Update
@@ -50,13 +54,22 @@ class MainFrame(wx.Frame):
                  self.panel.Update()
              except: pass
              
-             # Cancel previous timer if pending
-             if hasattr(self, '_activation_timer') and self._activation_timer.IsRunning():
-                 self._activation_timer.Stop()
+             self._cancel_pending_focus()
 
              # Restore Focus with DELAY
-             target = self.panel.force_focus if hasattr(self.panel, 'force_focus') else self.panel.SetFocus
-             self._activation_timer = wx.CallLater(250, target)
+             # We must bind validity check to execution time
+             def safe_focus():
+                 if not self or not self.panel: return
+                 # Check if panel is dead C++ object
+                 try: 
+                     if not self.panel: return
+                 except RuntimeError: return
+                 
+                 target = self.panel.force_focus if hasattr(self.panel, 'force_focus') else self.panel.SetFocus
+                 try: target()
+                 except: pass
+
+             self._activation_timer = wx.CallLater(250, safe_focus)
         event.Skip()
 
     
@@ -140,6 +153,7 @@ class MainFrame(wx.Frame):
         threading.Thread(target=_check, daemon=True).start()
 
     def show_welcome_screen(self):
+        self._cancel_pending_focus()
         if self.panel:
             self._cleanup_current_panel()
             self.panel.Hide()
@@ -246,6 +260,7 @@ class MainFrame(wx.Frame):
 
     def switch_to_panel(self, panel_class, **kwargs):
         """Switches the content of the main frame to a new panel."""
+        self._cancel_pending_focus()
         self._cleanup_current_panel()
         self.panel.Hide()
         self.panel.Destroy()
